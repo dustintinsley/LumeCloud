@@ -192,7 +192,7 @@ extension JSONValue {
 
     /// ECMAScript `Number::toString(10)`, fed by Swift's shortest round-trip digits.
     static func formatNumber(_ value: Double) throws -> String {
-        guard value.isFinite else { throw LumeCloudCryptoError.nonFiniteNumber }
+        guard value.isFinite else { throw StreamenCloudCryptoError.nonFiniteNumber }
         if value == 0 { return "0" } // also -0, like JavaScript
 
         // Swift's `description` yields the shortest digits that round-trip,

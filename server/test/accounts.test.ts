@@ -46,7 +46,7 @@ describe("accounts", () => {
 		expect(typeof body["createdAt"]).toBe("number");
 
 		const me = await call("/v1/accounts/me", {
-			headers: { authorization: bearer(accountId, authKey), "x-lume-device": randomUuid() },
+			headers: { authorization: bearer(accountId, authKey), "x-streamen-device": randomUuid() },
 		});
 		expect(me.status).toBe(200);
 		expect(await me.json()).toMatchObject({ accountId, recordCount: 0 });
@@ -91,11 +91,11 @@ describe("accounts", () => {
 
 		const device = randomUuid();
 		const original = await call("/v1/accounts/me", {
-			headers: { authorization: bearer(accountId, authKey), "x-lume-device": device },
+			headers: { authorization: bearer(accountId, authKey), "x-streamen-device": device },
 		});
 		expect(original.status).toBe(200);
 		const squatter = await call("/v1/accounts/me", {
-			headers: { authorization: bearer(accountId, otherKey), "x-lume-device": device },
+			headers: { authorization: bearer(accountId, otherKey), "x-streamen-device": device },
 		});
 		expect(squatter.status).toBe(401);
 	});
@@ -115,7 +115,7 @@ describe("accounts", () => {
 		const { accountId } = await res.json<{ accountId: string }>();
 		expect(accountId).toMatch(/^[A-Za-z0-9_-]{22}$/);
 		const me = await call("/v1/accounts/me", {
-			headers: { authorization: bearer(accountId, authKey), "x-lume-device": randomUuid() },
+			headers: { authorization: bearer(accountId, authKey), "x-streamen-device": randomUuid() },
 		});
 		expect(me.status).toBe(200);
 	});
@@ -135,23 +135,23 @@ describe("accounts", () => {
 		const acct = await newAccount();
 		const wrong = crypto.getRandomValues(new Uint8Array(32));
 		const res = await call("/v1/accounts/me", {
-			headers: { authorization: bearer(acct.accountId, wrong), "x-lume-device": acct.deviceId },
+			headers: { authorization: bearer(acct.accountId, wrong), "x-streamen-device": acct.deviceId },
 		});
 		expect(res.status).toBe(401);
 		expect(await res.json()).toMatchObject({ error: "bad_auth" });
 	});
 
 	it("rejects missing or malformed Authorization with bad_auth", async () => {
-		const missing = await call("/v1/accounts/me", { headers: { "x-lume-device": randomUuid() } });
+		const missing = await call("/v1/accounts/me", { headers: { "x-streamen-device": randomUuid() } });
 		expect(missing.status).toBe(401);
 		const garbage = await call("/v1/accounts/me", {
-			headers: { authorization: "Bearer nonsense", "x-lume-device": randomUuid() },
+			headers: { authorization: "Bearer nonsense", "x-streamen-device": randomUuid() },
 		});
 		expect(garbage.status).toBe(401);
 		expect(await garbage.json()).toMatchObject({ error: "bad_auth" });
 	});
 
-	it("requires X-Lume-Device on authenticated routes", async () => {
+	it("requires X-Streamen-Device on authenticated routes", async () => {
 		const acct = await newAccount();
 		const res = await call("/v1/accounts/me", { headers: acct.headers(null) });
 		expect(res.status).toBe(400);
@@ -182,7 +182,7 @@ describe("accounts", () => {
 	it("an unknown account id returns account_deleted and creates no storage", async () => {
 		const accountId = randomB64url(16);
 		const authKey = crypto.getRandomValues(new Uint8Array(32));
-		const headers = { authorization: bearer(accountId, authKey), "x-lume-device": randomUuid() };
+		const headers = { authorization: bearer(accountId, authKey), "x-streamen-device": randomUuid() };
 
 		const reads = [
 			await call("/v1/accounts/me", { headers }),

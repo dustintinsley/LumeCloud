@@ -1,6 +1,6 @@
 import CryptoKit
 import Foundation
-@testable import LumeCloudKit
+@testable import StreamenCloudKit
 import Testing
 
 /// `spec/vectors/crypto.json` — the cross-platform known answers.
@@ -13,13 +13,13 @@ import Testing
 ///
 /// Regenerate after an intentional change with:
 ///
-///     LUME_CLOUD_WRITE_VECTORS=1 swift test --filter CryptoVectorTests
+///     STREAMEN_CLOUD_WRITE_VECTORS=1 swift test --filter CryptoVectorTests
 @Suite("Crypto vectors")
 struct CryptoVectorTests {
     static let fileURL = URL(fileURLWithPath: #filePath)
-        .deletingLastPathComponent() // LumeCloudKitTests
+        .deletingLastPathComponent() // StreamenCloudKitTests
         .deletingLastPathComponent() // Tests
-        .deletingLastPathComponent() // LumeCloudKit
+        .deletingLastPathComponent() // StreamenCloudKit
         .deletingLastPathComponent() // repo root
         .appending(path: "spec/vectors/crypto.json")
 
@@ -27,15 +27,15 @@ struct CryptoVectorTests {
 
     static let rootKey = Data(0 ..< 32)
     /// Derived from `rootKey` (§2.1), like every real account id.
-    static var accountId: String { try! LumeCloudKeys(rootKey: rootKey).accountId } // swiftlint:disable:this force_try
+    static var accountId: String { try! StreamenCloudKeys(rootKey: rootKey).accountId } // swiftlint:disable:this force_try
     static let profileUUID = "6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D"
     static let pairingPrivateKey = Data(0x20 ..< 0x40)
     static let pairingCode = "483920"
 
-    static var payloads: [(payload: LumeCloudPayload, nonce: Data)] {
+    static var payloads: [(payload: StreamenCloudPayload, nonce: Data)] {
         [
             (
-                LumeCloudPayload(type: "profile", key: "profile/\(profileUUID)", data: [
+                StreamenCloudPayload(type: "profile", key: "profile/\(profileUUID)", data: [
                     "id": .string(profileUUID),
                     "name": "Zoë's \"Room\"",
                     "symbolName": "star.fill",
@@ -48,7 +48,7 @@ struct CryptoVectorTests {
                 Data(0xA0 ..< 0xAC)
             ),
             (
-                LumeCloudPayload(type: "content", key: "content/\(profileUUID)/movie-1001", data: [
+                StreamenCloudPayload(type: "content", key: "content/\(profileUUID)/movie-1001", data: [
                     "contentId": "movie-1001",
                     "kindRaw": "movie",
                     "profileID": .string(profileUUID),
@@ -150,14 +150,14 @@ struct CryptoVectorTests {
         try Curve25519.KeyAgreement.PrivateKey(rawRepresentation: pairingPrivateKey)
     }
 
-    static var grant: LumeCloudGrant {
-        LumeCloudGrant(accountId: accountId, rootKey: rootKey, serverURL: LumeCloudAPI.stagingURL)
+    static var grant: StreamenCloudGrant {
+        StreamenCloudGrant(accountId: accountId, rootKey: rootKey, serverURL: StreamenCloudAPI.stagingURL)
     }
 
     /// Everything deterministic, plus the given (random) HPKE `enc` and `ciphertext`.
     static func generate(sealed: SealedGrant) throws -> Vectors {
-        let keys = try LumeCloudKeys(rootKey: rootKey)
-        let rendering = LumeCloudRecoveryKey.encode(keys)
+        let keys = try StreamenCloudKeys(rootKey: rootKey)
+        let rendering = StreamenCloudRecoveryKey.encode(keys)
 
         let records = try payloads.map { payload, nonce in
             let rid = keys.recordID(for: payload.key)
@@ -173,7 +173,7 @@ struct CryptoVectorTests {
         }
 
         guard var unsupported = Base64URL.decode(records[0].envelope) else {
-            throw LumeCloudCryptoError.invalidBase64
+            throw StreamenCloudCryptoError.invalidBase64
         }
         unsupported[0] = 0x02
 
@@ -187,7 +187,7 @@ struct CryptoVectorTests {
         let privateKey = try pairingKey()
         let grant = Self.grant
         return try Vectors(
-            format: "lume-cloud-crypto-vectors",
+            format: "streamen-cloud-crypto-vectors",
             version: 1,
             notes: [
                 "Binary values are base64url without padding unless the field name ends in Hex.",
@@ -204,14 +204,14 @@ struct CryptoVectorTests {
                 rootKeyHex: hex(rootKey),
                 rootKey: Base64URL.encode(rootKey),
                 hkdf: "HKDF-SHA256, salt = empty, L = 32",
-                encKey: .init(info: LumeCloudKeys.Info.enc, value: Base64URL.encode(keys.encKey)),
-                idKey: .init(info: LumeCloudKeys.Info.id, value: Base64URL.encode(keys.idKey)),
-                authKey: .init(info: LumeCloudKeys.Info.auth, value: Base64URL.encode(keys.authKey)),
+                encKey: .init(info: StreamenCloudKeys.Info.enc, value: Base64URL.encode(keys.encKey)),
+                idKey: .init(info: StreamenCloudKeys.Info.id, value: Base64URL.encode(keys.idKey)),
+                authKey: .init(info: StreamenCloudKeys.Info.auth, value: Base64URL.encode(keys.authKey)),
                 authVerifier: keys.authVerifier,
                 authToken: keys.authToken,
-                accountIdInfo: LumeCloudKeys.Info.account,
+                accountIdInfo: StreamenCloudKeys.Info.account,
                 accountId: keys.accountId,
-                authorizationHeader: LumeCloudClient.Credentials(keys: keys, deviceID: UUID()).authorizationHeader
+                authorizationHeader: StreamenCloudClient.Credentials(keys: keys, deviceID: UUID()).authorizationHeader
             ),
             recoveryKey: Vectors.RecoveryKey(
                 rendering: rendering,
@@ -230,7 +230,7 @@ struct CryptoVectorTests {
             ),
             pairing: Vectors.Pairing(
                 suite: "DHKEM(X25519, HKDF-SHA256) / HKDF-SHA256 / AES-256-GCM",
-                info: string(LumeCloudPairing.info),
+                info: string(StreamenCloudPairing.info),
                 code: pairingCode,
                 recipientPrivateKey: Base64URL.encode(privateKey.rawRepresentation),
                 recipientPublicKey: Base64URL.encode(privateKey.publicKey.rawRepresentation),
@@ -257,7 +257,7 @@ struct CryptoVectorTests {
     static func validSealed(in vectors: Vectors?) -> SealedGrant? {
         guard let pairing = vectors?.pairing else { return nil }
         let sealed = SealedGrant(enc: pairing.enc, ciphertext: pairing.ciphertext)
-        guard let grant = try? LumeCloudPairing.open(sealed, privateKey: pairingKey(), code: pairingCode),
+        guard let grant = try? StreamenCloudPairing.open(sealed, privateKey: pairingKey(), code: pairingCode),
               grant == Self.grant else { return nil }
         return sealed
     }
@@ -265,17 +265,17 @@ struct CryptoVectorTests {
     // MARK: Tests
 
     @Test func committedVectorsMatch() throws {
-        if ProcessInfo.processInfo.environment["LUME_CLOUD_WRITE_VECTORS"] == "1" {
+        if ProcessInfo.processInfo.environment["STREAMEN_CLOUD_WRITE_VECTORS"] == "1" {
             // An older file may not decode any more; then the pairing is resealed too.
             let committed = (try? Self.load()) ?? nil
             let sealed = try Self.validSealed(in: committed)
-                ?? LumeCloudPairing.seal(Self.grant, to: Base64URL.encode(Self.pairingKey().publicKey.rawRepresentation), code: Self.pairingCode)
+                ?? StreamenCloudPairing.seal(Self.grant, to: Base64URL.encode(Self.pairingKey().publicKey.rawRepresentation), code: Self.pairingCode)
             try FileManager.default.createDirectory(at: Self.fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try Self.encode(Self.generate(sealed: sealed)).write(to: Self.fileURL, options: .atomic)
             return
         }
 
-        let vectors = try #require(try Self.load(), "spec/vectors/crypto.json is missing; run with LUME_CLOUD_WRITE_VECTORS=1")
+        let vectors = try #require(try Self.load(), "spec/vectors/crypto.json is missing; run with STREAMEN_CLOUD_WRITE_VECTORS=1")
         let sealed = try #require(Self.validSealed(in: vectors), "the committed pairing vector doesn't open")
         let expected = try Self.generate(sealed: sealed)
         #expect(vectors.keys == expected.keys)
@@ -293,7 +293,7 @@ struct CryptoVectorTests {
     @Test func committedVectorsVerifyThroughPublicAPI() throws {
         let vectors = try #require(try Self.load())
         let rootKey = try #require(Base64URL.decode(vectors.keys.rootKey))
-        let keys = try LumeCloudKeys(rootKey: rootKey)
+        let keys = try StreamenCloudKeys(rootKey: rootKey)
         #expect(Base64URL.encode(keys.encKey) == vectors.keys.encKey.value)
         #expect(Base64URL.encode(keys.idKey) == vectors.keys.idKey.value)
         #expect(Base64URL.encode(keys.authKey) == vectors.keys.authKey.value)
@@ -301,24 +301,24 @@ struct CryptoVectorTests {
         #expect(keys.accountId == vectors.keys.accountId)
         #expect(vectors.keys.authorizationHeader == "Bearer \(vectors.keys.accountId).\(keys.authToken)")
 
-        #expect(LumeCloudRecoveryKey.encode(keys) == vectors.recoveryKey.rendering)
+        #expect(StreamenCloudRecoveryKey.encode(keys) == vectors.recoveryKey.rendering)
         for variant in vectors.recoveryKey.acceptedVariants {
-            #expect(try LumeCloudRecoveryKey.decode(variant) == rootKey)
+            #expect(try StreamenCloudRecoveryKey.decode(variant) == rootKey)
         }
         for typo in vectors.recoveryKey.rejectedTypos {
-            #expect(throws: LumeCloudCryptoError.recoveryKeyChecksumMismatch) { try LumeCloudRecoveryKey.decode(typo) }
+            #expect(throws: StreamenCloudCryptoError.recoveryKeyChecksumMismatch) { try StreamenCloudRecoveryKey.decode(typo) }
         }
 
         for record in vectors.records {
             #expect(keys.recordID(for: record.logicalKey) == record.rid)
             let plaintext = try keys.open(record.envelope, rid: record.rid)
             #expect(Self.string(plaintext) == record.canonicalPayload)
-            let payload = try LumeCloudPayload.decode(plaintext)
+            let payload = try StreamenCloudPayload.decode(plaintext)
             #expect(try Self.string(payload.encoded()) == record.canonicalPayload)
             #expect(try Self.string(record.payload.canonicalJSON()) == record.canonicalPayload)
         }
 
-        #expect(throws: LumeCloudCryptoError.unsupportedEnvelopeVersion(UInt8(vectors.unsupportedEnvelope.versionByte))) {
+        #expect(throws: StreamenCloudCryptoError.unsupportedEnvelopeVersion(UInt8(vectors.unsupportedEnvelope.versionByte))) {
             try keys.open(vectors.unsupportedEnvelope.envelope, rid: vectors.unsupportedEnvelope.rid)
         }
 
@@ -326,10 +326,10 @@ struct CryptoVectorTests {
             rawRepresentation: #require(Base64URL.decode(vectors.pairing.recipientPrivateKey))
         )
         let sealed = SealedGrant(enc: vectors.pairing.enc, ciphertext: vectors.pairing.ciphertext)
-        let grant = try LumeCloudPairing.open(sealed, privateKey: privateKey, code: vectors.pairing.code)
+        let grant = try StreamenCloudPairing.open(sealed, privateKey: privateKey, code: vectors.pairing.code)
         #expect(try Self.string(grant.encoded()) == vectors.pairing.canonicalGrant)
-        #expect(throws: LumeCloudCryptoError.authenticationFailed) {
-            try LumeCloudPairing.open(sealed, privateKey: privateKey, code: "000000")
+        #expect(throws: StreamenCloudCryptoError.authenticationFailed) {
+            try StreamenCloudPairing.open(sealed, privateKey: privateKey, code: "000000")
         }
     }
 }

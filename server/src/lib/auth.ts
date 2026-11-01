@@ -1,4 +1,4 @@
-// Parses `Authorization: Bearer <accountId>.<authKeyB64url>` + X-Lume-Device.
+// Parses `Authorization: Bearer <accountId>.<authKeyB64url>` + X-Streamen-Device.
 
 import { decodeB64url, sha256B64url } from "./b64url";
 import { ApiError, badRequest } from "./errors";
@@ -23,7 +23,7 @@ export function bearerAccountId(request: Request): string {
 
 /**
  * Validates the auth header shape and computes the verifier the account stores.
- * The DO does the constant-time compare. `requireDevice` enforces X-Lume-Device.
+ * The DO does the constant-time compare. `requireDevice` enforces X-Streamen-Device.
  */
 export async function readCredentials(request: Request, requireDevice: boolean): Promise<Credentials> {
 	const accountId = bearerAccountId(request);
@@ -32,13 +32,13 @@ export async function readCredentials(request: Request, requireDevice: boolean):
 	const authKey = decodeB64url(keyPart);
 	if (authKey === null || authKey.byteLength !== 32) throw badAuth();
 
-	const rawDevice = request.headers.get("x-lume-device");
+	const rawDevice = request.headers.get("x-streamen-device");
 	let deviceId: string | null = null;
 	if (rawDevice !== null && rawDevice !== "") {
-		if (!isUuid(rawDevice)) throw badRequest("X-Lume-Device must be a UUID");
+		if (!isUuid(rawDevice)) throw badRequest("X-Streamen-Device must be a UUID");
 		deviceId = rawDevice.toUpperCase();
 	} else if (requireDevice) {
-		throw badRequest("Missing X-Lume-Device header");
+		throw badRequest("Missing X-Streamen-Device header");
 	}
 
 	return { accountId, auth: { verifier: await sha256B64url(authKey), deviceId } };

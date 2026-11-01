@@ -3,15 +3,15 @@ import Foundation
     import FoundationNetworking
 #endif
 
-/// Every failure `LumeCloudClient` can throw. Each `error` code of
+/// Every failure `StreamenCloudClient` can throw. Each `error` code of
 /// PROTOCOL.md §1 has its own case. No case carries a token, key or URL.
-public enum LumeCloudError: Error, Sendable {
+public enum StreamenCloudError: Error, Sendable {
     /// 400 `bad_request` — malformed JSON, a missing field or bad base64url.
     /// The associated value is the server's human-readable message, if any.
     case badRequest(message: String?)
     /// 401 `bad_auth` — missing or wrong credentials.
     case badAuth
-    /// 401 `device_revoked` — stop syncing and show "removed from Lume Cloud".
+    /// 401 `device_revoked` — stop syncing and show "removed from Streamen Cloud".
     case deviceRevoked
     /// 403 `signup_closed` — the instance is invite-only and the invite is missing or wrong.
     case signupClosed
@@ -46,27 +46,27 @@ public enum LumeCloudError: Error, Sendable {
     case missingCredentials
 }
 
-extension LumeCloudError {
+extension StreamenCloudError {
     /// Maps a non-2xx response to a typed error. The `error` code wins; the
     /// status decides only when the body isn't the documented JSON (e.g. an
     /// edge proxy's 429). An unknown code on any status but 429 becomes
     /// `.server(status:code:)`.
-    static func from(status: Int, body: Data, retryAfter: String?) -> LumeCloudError {
+    static func from(status: Int, body: Data, retryAfter: String?) -> StreamenCloudError {
         let payload = try? JSONDecoder().decode(ErrorBody.self, from: body)
         let code = payload?.error
         switch code {
-        case LumeCloudErrorCode.badRequest: return .badRequest(message: payload?.message)
-        case LumeCloudErrorCode.badAuth: return .badAuth
-        case LumeCloudErrorCode.deviceRevoked: return .deviceRevoked
-        case LumeCloudErrorCode.signupClosed: return .signupClosed
-        case LumeCloudErrorCode.accountDeleted: return .accountDeleted
-        case LumeCloudErrorCode.notFound: return .notFound
-        case LumeCloudErrorCode.accountExists: return .accountExists
-        case LumeCloudErrorCode.pairingAlreadySealed: return .pairingAlreadySealed
-        case LumeCloudErrorCode.resyncRequired: return .resyncRequired
-        case LumeCloudErrorCode.recordTooLarge: return .recordTooLarge
-        case LumeCloudErrorCode.rateLimited: return .rateLimited(retryAfter: parseRetryAfter(retryAfter))
-        case LumeCloudErrorCode.quotaExceeded: return .quotaExceeded
+        case StreamenCloudErrorCode.badRequest: return .badRequest(message: payload?.message)
+        case StreamenCloudErrorCode.badAuth: return .badAuth
+        case StreamenCloudErrorCode.deviceRevoked: return .deviceRevoked
+        case StreamenCloudErrorCode.signupClosed: return .signupClosed
+        case StreamenCloudErrorCode.accountDeleted: return .accountDeleted
+        case StreamenCloudErrorCode.notFound: return .notFound
+        case StreamenCloudErrorCode.accountExists: return .accountExists
+        case StreamenCloudErrorCode.pairingAlreadySealed: return .pairingAlreadySealed
+        case StreamenCloudErrorCode.resyncRequired: return .resyncRequired
+        case StreamenCloudErrorCode.recordTooLarge: return .recordTooLarge
+        case StreamenCloudErrorCode.rateLimited: return .rateLimited(retryAfter: parseRetryAfter(retryAfter))
+        case StreamenCloudErrorCode.quotaExceeded: return .quotaExceeded
         default: break
         }
         switch status {
@@ -95,12 +95,12 @@ extension LumeCloudError {
 
     /// A `URLError` with the same code but no `userInfo`, so the failing URL
     /// (which can carry a poll token) never ends up in a description or log.
-    static func sanitizedTransport(_ error: URLError) -> LumeCloudError {
+    static func sanitizedTransport(_ error: URLError) -> StreamenCloudError {
         .transport(URLError(error.code))
     }
 
     /// A decoding failure described by its coding path only.
-    static func decodingFailure(_ error: any Error) -> LumeCloudError {
+    static func decodingFailure(_ error: any Error) -> StreamenCloudError {
         guard let error = error as? DecodingError else { return .decoding("unexpected response") }
         let (kind, context): (String, DecodingError.Context) = switch error {
         case let .typeMismatch(_, context): ("type mismatch", context)
@@ -114,29 +114,29 @@ extension LumeCloudError {
     }
 }
 
-extension LumeCloudError: LocalizedError {
+extension StreamenCloudError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case let .badRequest(message):
-            message ?? "Lume Cloud rejected the request."
+            message ?? "Streamen Cloud rejected the request."
         case .badAuth:
-            "Lume Cloud didn't accept this device's credentials."
+            "Streamen Cloud didn't accept this device's credentials."
         case .deviceRevoked:
-            "This device was removed from Lume Cloud."
+            "This device was removed from Streamen Cloud."
         case .signupClosed:
-            "This Lume Cloud server only accepts new accounts with an invite code."
+            "This Streamen Cloud server only accepts new accounts with an invite code."
         case .accountDeleted:
-            "This Lume Cloud account no longer exists."
+            "This Streamen Cloud account no longer exists."
         case .notFound:
             "Not found. The pairing code may have expired."
         case .accountExists:
-            "This Lume Cloud account already exists."
+            "This Streamen Cloud account already exists."
         case .pairingAlreadySealed:
             "Another device already answered this pairing code."
         case .resyncRequired:
-            "Lume Cloud needs a full resync."
+            "Streamen Cloud needs a full resync."
         case .recordTooLarge:
-            "An item is too large for Lume Cloud."
+            "An item is too large for Streamen Cloud."
         case let .rateLimited(retryAfter):
             if let retryAfter {
                 "Too many requests. Try again in \(Int(retryAfter.rounded(.up))) seconds."
@@ -144,21 +144,21 @@ extension LumeCloudError: LocalizedError {
                 "Too many requests. Try again later."
             }
         case .quotaExceeded:
-            "This Lume Cloud account is full."
+            "This Streamen Cloud account is full."
         case let .server(status, _):
-            "Lume Cloud returned an error (HTTP \(status))."
+            "Streamen Cloud returned an error (HTTP \(status))."
         case let .transport(error):
-            "Couldn't reach Lume Cloud: \(error.localizedDescription)"
+            "Couldn't reach Streamen Cloud: \(error.localizedDescription)"
         case .decoding:
-            "Lume Cloud sent an unexpected response."
+            "Streamen Cloud sent an unexpected response."
         case .missingCredentials:
-            "This device isn't signed in to Lume Cloud."
+            "This device isn't signed in to Streamen Cloud."
         }
     }
 }
 
-extension LumeCloudError: Equatable {
-    public static func == (lhs: LumeCloudError, rhs: LumeCloudError) -> Bool {
+extension StreamenCloudError: Equatable {
+    public static func == (lhs: StreamenCloudError, rhs: StreamenCloudError) -> Bool {
         switch (lhs, rhs) {
         case (.badAuth, .badAuth), (.deviceRevoked, .deviceRevoked), (.signupClosed, .signupClosed),
              (.accountDeleted, .accountDeleted), (.notFound, .notFound),

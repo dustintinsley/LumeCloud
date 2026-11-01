@@ -7,7 +7,7 @@ import Foundation
 // MARK: - Constants
 
 /// Version and header constants of the protocol this Kit speaks.
-public enum LumeCloudAPI {
+public enum StreamenCloudAPI {
     /// The protocol version (the path prefix is `/v1`).
     public static let version = 1
     /// The official instance.
@@ -15,7 +15,7 @@ public enum LumeCloudAPI {
     /// The staging instance.
     public static let stagingURL = URL(string: "https://cloud-staging.getlume.org")!
     /// Header carrying this device's id on authenticated routes.
-    public static let deviceHeader = "X-Lume-Device"
+    public static let deviceHeader = "X-Streamen-Device"
     /// Largest page `changes(since:limit:)` may request.
     public static let maxChangesLimit = 1000
     /// Most records one `push` may carry.
@@ -25,7 +25,7 @@ public enum LumeCloudAPI {
 }
 
 /// The `error` codes of PROTOCOL.md §1.
-public enum LumeCloudErrorCode {
+public enum StreamenCloudErrorCode {
     public static let badRequest = "bad_request"
     public static let badAuth = "bad_auth"
     public static let deviceRevoked = "device_revoked"
@@ -42,22 +42,22 @@ public enum LumeCloudErrorCode {
 
 /// A device platform as the server stores it. A value this Kit doesn't know
 /// (from a newer client) decodes and re-encodes unchanged.
-public struct LumeCloudPlatform: RawRepresentable, Codable, Sendable, Hashable, CustomStringConvertible {
+public struct StreamenCloudPlatform: RawRepresentable, Codable, Sendable, Hashable, CustomStringConvertible {
     public var rawValue: String
 
     public init(rawValue: String) {
         self.rawValue = rawValue
     }
 
-    public static let iOS = LumeCloudPlatform(rawValue: "ios")
-    public static let tvOS = LumeCloudPlatform(rawValue: "tvos")
-    public static let macOS = LumeCloudPlatform(rawValue: "macos")
-    public static let visionOS = LumeCloudPlatform(rawValue: "visionos")
-    public static let android = LumeCloudPlatform(rawValue: "android")
-    public static let androidTV = LumeCloudPlatform(rawValue: "androidtv")
+    public static let iOS = StreamenCloudPlatform(rawValue: "ios")
+    public static let tvOS = StreamenCloudPlatform(rawValue: "tvos")
+    public static let macOS = StreamenCloudPlatform(rawValue: "macos")
+    public static let visionOS = StreamenCloudPlatform(rawValue: "visionos")
+    public static let android = StreamenCloudPlatform(rawValue: "android")
+    public static let androidTV = StreamenCloudPlatform(rawValue: "androidtv")
 
     /// The platform this code was compiled for.
-    public static var current: LumeCloudPlatform {
+    public static var current: StreamenCloudPlatform {
         #if os(tvOS)
             .tvOS
         #elseif os(visionOS)
@@ -84,7 +84,7 @@ public struct LumeCloudPlatform: RawRepresentable, Codable, Sendable, Hashable, 
 // MARK: - Accounts (§4.1)
 
 public struct AccountCreated: Codable, Sendable, Hashable {
-    /// 22-char base64url account id: `LumeCloudKeys.accountId` when the
+    /// 22-char base64url account id: `StreamenCloudKeys.accountId` when the
     /// client sent one (always, from this Kit). Not secret on its own.
     public var accountId: String
     public var createdAt: Int
@@ -126,12 +126,12 @@ struct CreateAccountBody: Encodable {
 public struct Device: Codable, Sendable, Hashable, Identifiable {
     public var id: UUID
     public var name: String
-    public var platform: LumeCloudPlatform
+    public var platform: StreamenCloudPlatform
     public var createdAt: Int
     public var lastSeen: Int
     public var revoked: Bool
 
-    public init(id: UUID, name: String, platform: LumeCloudPlatform, createdAt: Int, lastSeen: Int, revoked: Bool) {
+    public init(id: UUID, name: String, platform: StreamenCloudPlatform, createdAt: Int, lastSeen: Int, revoked: Bool) {
         self.id = id
         self.name = name
         self.platform = platform
@@ -144,7 +144,7 @@ public struct Device: Codable, Sendable, Hashable, Identifiable {
 struct RegisterDeviceBody: Encodable {
     var id: String
     var name: String
-    var platform: LumeCloudPlatform
+    var platform: StreamenCloudPlatform
 }
 
 struct DeviceList: Decodable {
@@ -159,7 +159,7 @@ public struct RemoteRecord: Codable, Sendable, Hashable {
     public var version: Int
     public var seq: Int
     public var deleted: Bool
-    /// The base64url envelope; open it with `LumeCloudKeys.open(_:rid:)`.
+    /// The base64url envelope; open it with `StreamenCloudKeys.open(_:rid:)`.
     public var ciphertext: String?
     public var updatedAt: Int
 
@@ -307,7 +307,7 @@ public struct PushResponse: Codable, Sendable, Hashable {
 struct StartPairingBody: Encodable {
     var publicKey: String
     var deviceName: String
-    var platform: LumeCloudPlatform
+    var platform: StreamenCloudPlatform
 }
 
 /// Returned to the new device by `startPairing`. Show `code`; keep `pollToken`
@@ -335,10 +335,10 @@ public struct PairingRequest: Codable, Sendable, Hashable {
     /// The new device's raw X25519 public key, base64url.
     public var publicKey: String
     public var deviceName: String
-    public var platform: LumeCloudPlatform
+    public var platform: StreamenCloudPlatform
     public var expiresAt: Int
 
-    public init(publicKey: String, deviceName: String, platform: LumeCloudPlatform, expiresAt: Int) {
+    public init(publicKey: String, deviceName: String, platform: StreamenCloudPlatform, expiresAt: Int) {
         self.publicKey = publicKey
         self.deviceName = deviceName
         self.platform = platform

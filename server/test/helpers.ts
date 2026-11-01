@@ -51,7 +51,7 @@ export async function newAccount(): Promise<TestAccount> {
 		deviceId,
 		headers: (device: string | null = deviceId) => {
 			const h: Record<string, string> = { authorization: bearer(accountId, authKey) };
-			if (device !== null) h["x-lume-device"] = device;
+			if (device !== null) h["x-streamen-device"] = device;
 			return h;
 		},
 	};

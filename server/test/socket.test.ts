@@ -63,7 +63,7 @@ describe("realtime socket", () => {
 		const res = await call("/v1/socket", {
 			headers: {
 				authorization: `Bearer ${acct.accountId}.${"A".repeat(43)}`,
-				"x-lume-device": acct.deviceId,
+				"x-streamen-device": acct.deviceId,
 				upgrade: "websocket",
 			},
 		});

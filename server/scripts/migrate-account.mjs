@@ -1,14 +1,14 @@
 #!/usr/bin/env node
-// Copies one Lume Cloud account from one server to another (e.g. staging →
+// Copies one Streamen Cloud account from one server to another (e.g. staging →
 // production). Runs entirely on the client side with the account's recovery
 // key: the account id and auth are derived from the root key (PROTOCOL §2.1),
 // and envelopes are bound to their rid only (§2.4), so ciphertext is copied
 // verbatim. Nothing is decrypted.
 //
-//   LUME_RECOVERY_KEY='XXXX-XXXX-…' node scripts/migrate-account.mjs \
+//   STREAMEN_RECOVERY_KEY='XXXX-XXXX-…' node scripts/migrate-account.mjs \
 //     --from https://cloud-staging.getlume.org --to https://cloud.getlume.org
 //
-// Without LUME_RECOVERY_KEY the key is read from stdin (hidden when it's a TTY).
+// Without STREAMEN_RECOVERY_KEY the key is read from stdin (hidden when it's a TTY).
 // No dependencies; Node 20+.
 
 import { createHash, hkdfSync, randomUUID } from "node:crypto";
@@ -27,7 +27,7 @@ Options:
   --dry-run          Read both sides and report; write nothing
   -h, --help         Show this help
 
-The recovery key comes from $LUME_RECOVERY_KEY or stdin.`;
+The recovery key comes from $STREAMEN_RECOVERY_KEY or stdin.`;
 
 // Push limits (§4.4): 500 records and 4 MiB per request. Stay below the byte cap.
 const PUSH_MAX_RECORDS = 500;
@@ -69,9 +69,9 @@ const hkdf = (rootKey, info, length) =>
 
 /** Derives the account id, auth token and verifier from the root key. */
 export function deriveAccount(rootKey) {
-	const authKey = hkdf(rootKey, "lume-cloud/v1/auth", 32);
+	const authKey = hkdf(rootKey, "streamen-cloud/v1/auth", 32);
 	return {
-		accountId: hkdf(rootKey, "lume-cloud/v1/account", 16).toString("base64url"),
+		accountId: hkdf(rootKey, "streamen-cloud/v1/account", 16).toString("base64url"),
 		authToken: authKey.toString("base64url"),
 		authVerifier: createHash("sha256").update(authKey).digest("base64url"),
 	};
@@ -97,7 +97,7 @@ function server(baseURL, account, deviceId) {
 		const headers = { accept: "application/json" };
 		if (authenticated) {
 			headers.authorization = `Bearer ${account.accountId}.${account.authToken}`;
-			headers["x-lume-device"] = deviceId;
+			headers["x-streamen-device"] = deviceId;
 		}
 		if (body !== undefined) headers["content-type"] = "application/json";
 
@@ -360,7 +360,7 @@ async function main() {
 		process.exit(2);
 	}
 
-	const recoveryKey = process.env.LUME_RECOVERY_KEY ?? (await readSecret("Recovery key: "));
+	const recoveryKey = process.env.STREAMEN_RECOVERY_KEY ?? (await readSecret("Recovery key: "));
 	const result = await migrate({
 		from: values.from,
 		to: values.to,

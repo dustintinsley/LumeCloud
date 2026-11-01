@@ -7,7 +7,7 @@ import { isUuid, requireDeviceName, requirePlatform, requireString, requireUuid 
 import { authenticate } from "./context";
 
 export async function registerDevice(request: Request, env: Env): Promise<Response> {
-	// X-Lume-Device is optional here: the body carries the id being registered.
+	// X-Streamen-Device is optional here: the body carries the id being registered.
 	const { account, auth } = await authenticate(request, env, false);
 	const body = await readJsonObject(request, MAX_SMALL_BODY_BYTES);
 	const input = {

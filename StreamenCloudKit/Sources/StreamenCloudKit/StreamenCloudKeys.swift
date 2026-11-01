@@ -6,7 +6,7 @@ import Foundation
 /// Only `rootKey` needs storing (Keychain); everything else is derived. The
 /// type's `description` is redacted, so printing or logging a value never
 /// leaks key material.
-public struct LumeCloudKeys: Sendable, Hashable {
+public struct StreamenCloudKeys: Sendable, Hashable {
     /// Byte length of the root key and of each derived key.
     public static let keyByteCount = 32
     /// Version byte of the record envelope this Kit writes and reads.
@@ -17,10 +17,10 @@ public struct LumeCloudKeys: Sendable, Hashable {
 
     /// HKDF `info` strings (§2.1).
     enum Info {
-        static let enc = "lume-cloud/v1/enc"
-        static let id = "lume-cloud/v1/id"
-        static let auth = "lume-cloud/v1/auth"
-        static let account = "lume-cloud/v1/account"
+        static let enc = "streamen-cloud/v1/enc"
+        static let id = "streamen-cloud/v1/id"
+        static let auth = "streamen-cloud/v1/auth"
+        static let account = "streamen-cloud/v1/account"
     }
 
     /// Byte length of the derived account id before base64url encoding.
@@ -38,7 +38,7 @@ public struct LumeCloudKeys: Sendable, Hashable {
     /// Throws `.invalidKeyLength` unless `rootKey` is exactly 32 bytes.
     public init(rootKey: Data) throws {
         guard rootKey.count == Self.keyByteCount else {
-            throw LumeCloudCryptoError.invalidKeyLength(expected: Self.keyByteCount)
+            throw StreamenCloudCryptoError.invalidKeyLength(expected: Self.keyByteCount)
         }
         let rootKey = Data(rootKey) // re-base indices to 0
         self.rootKey = rootKey
@@ -48,16 +48,16 @@ public struct LumeCloudKeys: Sendable, Hashable {
     }
 
     /// Fresh keys from a cryptographically secure random root key.
-    public static func generate() -> LumeCloudKeys {
+    public static func generate() -> StreamenCloudKeys {
         let key = SymmetricKey(size: .bits256)
         let bytes = key.withUnsafeBytes { Data($0) }
         // A 32-byte key always passes the length check.
-        return try! LumeCloudKeys(rootKey: bytes) // swiftlint:disable:this force_try
+        return try! StreamenCloudKeys(rootKey: bytes) // swiftlint:disable:this force_try
     }
 
     // MARK: - Account id (§2.1)
 
-    /// `base64url(HKDF-SHA256(rootKey, salt = empty, info = "lume-cloud/v1/account", L = 16))`:
+    /// `base64url(HKDF-SHA256(rootKey, salt = empty, info = "streamen-cloud/v1/account", L = 16))`:
     /// 22 characters, sent as `accountId` to `POST /v1/accounts`.
     ///
     /// Every device holding the root key computes the same value, so a device
@@ -103,7 +103,7 @@ public struct LumeCloudKeys: Sendable, Hashable {
     /// reuse a nonce in production.
     func seal(_ plaintext: Data, rid: String, nonce nonceBytes: Data) throws -> String {
         guard nonceBytes.count == Self.nonceByteCount else {
-            throw LumeCloudCryptoError.invalidKeyLength(expected: Self.nonceByteCount)
+            throw StreamenCloudCryptoError.invalidKeyLength(expected: Self.nonceByteCount)
         }
         return try seal(plaintext, rid: rid, nonce: AES.GCM.Nonce(data: nonceBytes))
     }
@@ -130,16 +130,16 @@ public struct LumeCloudKeys: Sendable, Hashable {
     /// garbage.
     public func open(_ wire: String, rid: String) throws -> Data {
         guard let envelope = Base64URL.decode(wire) else {
-            throw LumeCloudCryptoError.invalidBase64
+            throw StreamenCloudCryptoError.invalidBase64
         }
         guard let version = envelope.first else {
-            throw LumeCloudCryptoError.malformedEnvelope
+            throw StreamenCloudCryptoError.malformedEnvelope
         }
         guard version == Self.envelopeVersion else {
-            throw LumeCloudCryptoError.unsupportedEnvelopeVersion(version)
+            throw StreamenCloudCryptoError.unsupportedEnvelopeVersion(version)
         }
         guard envelope.count >= 1 + Self.nonceByteCount + Self.tagByteCount else {
-            throw LumeCloudCryptoError.malformedEnvelope
+            throw StreamenCloudCryptoError.malformedEnvelope
         }
         let bytes = [UInt8](envelope)
         let nonceEnd = 1 + Self.nonceByteCount
@@ -152,7 +152,7 @@ public struct LumeCloudKeys: Sendable, Hashable {
             )
             return try AES.GCM.open(box, using: SymmetricKey(data: encKey), authenticating: Data(rid.utf8))
         } catch {
-            throw LumeCloudCryptoError.authenticationFailed
+            throw StreamenCloudCryptoError.authenticationFailed
         }
     }
 
@@ -171,8 +171,8 @@ public struct LumeCloudKeys: Sendable, Hashable {
     }
 }
 
-extension LumeCloudKeys: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
-    public var description: String { "LumeCloudKeys(<redacted>)" }
+extension StreamenCloudKeys: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+    public var description: String { "StreamenCloudKeys(<redacted>)" }
     public var debugDescription: String { description }
     /// No children, so `dump(_:)` and debugger summaries can't print the keys either.
     public var customMirror: Mirror { Mirror(self, children: [:]) }

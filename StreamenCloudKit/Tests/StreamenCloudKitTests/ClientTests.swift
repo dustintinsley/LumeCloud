@@ -2,7 +2,7 @@ import Foundation
 #if canImport(FoundationNetworking)
     import FoundationNetworking
 #endif
-@testable import LumeCloudKit
+@testable import StreamenCloudKit
 import Testing
 
 /// Captured request + canned response, keyed by a per-test host so suites can
@@ -103,20 +103,20 @@ final class StubURLProtocol: URLProtocol {
     }
 }
 
-@Suite("LumeCloudClient")
+@Suite("StreamenCloudClient")
 struct ClientTests {
     let host = "stub-\(UUID().uuidString.lowercased()).test"
     static let deviceID = UUID(uuidString: "11111111-2222-4333-8444-555555555555")!
-    static let credentials = LumeCloudClient.Credentials(accountId: "acct123", authToken: "tok-SECRET", deviceID: deviceID)
+    static let credentials = StreamenCloudClient.Credentials(accountId: "acct123", authToken: "tok-SECRET", deviceID: deviceID)
 
     private func makeClient(
-        credentials: LumeCloudClient.Credentials? = ClientTests.credentials,
+        credentials: StreamenCloudClient.Credentials? = ClientTests.credentials,
         handler: @escaping StubRegistry.Handler
-    ) -> LumeCloudClient {
+    ) -> StreamenCloudClient {
         StubRegistry.shared.register(host: host, handler: handler)
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [StubURLProtocol.self]
-        return LumeCloudClient(
+        return StreamenCloudClient(
             baseURL: URL(string: "https://\(host)")!,
             session: URLSession(configuration: configuration),
             credentials: credentials
@@ -137,18 +137,18 @@ struct ClientTests {
 
     private func expectFullAuth(_ request: StubRegistry.Captured) {
         #expect(request.headers["Authorization"] == "Bearer acct123.tok-SECRET")
-        #expect(request.headers["X-Lume-Device"] == "11111111-2222-4333-8444-555555555555")
+        #expect(request.headers["X-Streamen-Device"] == "11111111-2222-4333-8444-555555555555")
     }
 
     private func expectNoAuth(_ request: StubRegistry.Captured) {
         #expect(request.headers["Authorization"] == nil)
-        #expect(request.headers["X-Lume-Device"] == nil)
+        #expect(request.headers["X-Streamen-Device"] == nil)
     }
 
     // MARK: Accounts
 
     @Test func createAccount() async throws {
-        let keys = try LumeCloudKeys(rootKey: Data(0 ..< 32))
+        let keys = try StreamenCloudKeys(rootKey: Data(0 ..< 32))
         let client = makeClient { _ in Self.ok(#"{"accountId":"cbm-snbxbUtTCAM8n_puuA","createdAt":1760000000000}"#, status: 201) }
         let created = try await client.createAccount(keys: keys, invite: "inv")
         #expect(created == AccountCreated(accountId: keys.accountId, createdAt: 1_760_000_000_000))
@@ -163,7 +163,7 @@ struct ClientTests {
     }
 
     @Test func createAccountOmitsMissingInvite() async throws {
-        let keys = try LumeCloudKeys(rootKey: Data(0 ..< 32))
+        let keys = try StreamenCloudKeys(rootKey: Data(0 ..< 32))
         let client = makeClient(credentials: nil) { _ in Self.ok(#"{"accountId":"a","createdAt":1}"#, status: 201) }
         _ = try await client.createAccount(keys: keys)
         #expect(try lastRequest().json == ["authVerifier": .string(keys.authVerifier), "accountId": .string(keys.accountId)])
@@ -178,8 +178,8 @@ struct ClientTests {
 
     @Test func duplicateAccountIsTyped() async {
         let client = makeClient(credentials: nil) { _ in Self.error(409, "account_exists") }
-        await #expect(throws: LumeCloudError.accountExists) {
-            try await client.createAccount(keys: LumeCloudKeys.generate())
+        await #expect(throws: StreamenCloudError.accountExists) {
+            try await client.createAccount(keys: StreamenCloudKeys.generate())
         }
     }
 
@@ -218,7 +218,7 @@ struct ClientTests {
         #expect(request.path == "/v1/devices")
         #expect(request.json == ["id": "11111111-2222-4333-8444-555555555555", "name": "Living Room", "platform": "tvos"])
         #expect(request.headers["Authorization"] == "Bearer acct123.tok-SECRET")
-        #expect(request.headers["X-Lume-Device"] == nil)
+        #expect(request.headers["X-Streamen-Device"] == nil)
     }
 
     @Test func devicesKeepUnknownPlatforms() async throws {
@@ -317,7 +317,7 @@ struct ClientTests {
 
     @Test func unknownPushStatusIsADecodingError() async {
         let client = makeClient { _ in Self.ok(#"{"results":[{"rid":"r1","status":"maybe"}],"nextSeq":1}"#) }
-        await #expect(throws: LumeCloudError.decoding("invalid data at results.0.status")) {
+        await #expect(throws: StreamenCloudError.decoding("invalid data at results.0.status")) {
             try await client.push([.upsert(rid: "r1", baseVersion: 0, ciphertext: "AQ")])
         }
     }
@@ -385,15 +385,15 @@ struct ClientTests {
     // MARK: Base URL & credentials
 
     @Test func baseURLWithAPathPrefixIsKept() {
-        let client = LumeCloudClient(baseURL: URL(string: "https://example.com/lume/")!, credentials: nil)
+        let client = StreamenCloudClient(baseURL: URL(string: "https://example.com/streamen/")!, credentials: nil)
         #expect(client.url("v1/changes", query: [URLQueryItem(name: "since", value: "0")]).absoluteString
-            == "https://example.com/lume/v1/changes?since=0")
-        #expect(client.url("healthz").absoluteString == "https://example.com/lume/healthz")
+            == "https://example.com/streamen/v1/changes?since=0")
+        #expect(client.url("healthz").absoluteString == "https://example.com/streamen/healthz")
     }
 
     @Test func authenticatedCallWithoutCredentialsFailsLocally() async {
         let client = makeClient(credentials: nil) { _ in Self.ok("{}") }
-        await #expect(throws: LumeCloudError.missingCredentials) { try await client.account() }
+        await #expect(throws: StreamenCloudError.missingCredentials) { try await client.account() }
         #expect(StubRegistry.shared.requests(host: host).isEmpty)
     }
 
@@ -404,10 +404,10 @@ struct ClientTests {
     }
 
     @Test func credentialsFromKeys() throws {
-        let keys = try LumeCloudKeys(rootKey: Data(0 ..< 32))
-        let credentials = LumeCloudClient.Credentials(accountId: "a", keys: keys, deviceID: Self.deviceID)
+        let keys = try StreamenCloudKeys(rootKey: Data(0 ..< 32))
+        let credentials = StreamenCloudClient.Credentials(accountId: "a", keys: keys, deviceID: Self.deviceID)
         #expect(credentials.authorizationHeader == "Bearer a.Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY")
-        let derived = LumeCloudClient.Credentials(keys: keys, deviceID: Self.deviceID)
+        let derived = StreamenCloudClient.Credentials(keys: keys, deviceID: Self.deviceID)
         #expect(derived.accountId == "cbm-snbxbUtTCAM8n_puuA")
         #expect(derived.authorizationHeader == "Bearer cbm-snbxbUtTCAM8n_puuA.Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY")
         var dumped = ""
@@ -418,26 +418,26 @@ struct ClientTests {
     }
 
     @Test func socketRequest() throws {
-        let client = LumeCloudClient(baseURL: URL(string: "https://cloud.example")!, credentials: Self.credentials)
+        let client = StreamenCloudClient(baseURL: URL(string: "https://cloud.example")!, credentials: Self.credentials)
         let request = try client.makeSocketRequest()
         #expect(request.url?.absoluteString == "wss://cloud.example/v1/socket")
         #expect(request.value(forHTTPHeaderField: "Authorization") == "Bearer acct123.tok-SECRET")
-        #expect(request.value(forHTTPHeaderField: "X-Lume-Device") == "11111111-2222-4333-8444-555555555555")
-        let local = LumeCloudClient(baseURL: URL(string: "http://localhost:8787")!, credentials: Self.credentials)
+        #expect(request.value(forHTTPHeaderField: "X-Streamen-Device") == "11111111-2222-4333-8444-555555555555")
+        let local = StreamenCloudClient(baseURL: URL(string: "http://localhost:8787")!, credentials: Self.credentials)
         #expect(try local.makeSocketRequest().url?.absoluteString == "ws://localhost:8787/v1/socket")
     }
 
     @Test func socketMessages() {
-        #expect(LumeCloudClient.seq(from: .string(#"{"type":"seq","seq":44}"#)) == 44)
-        #expect(LumeCloudClient.seq(from: .data(Data(#"{"seq":7}"#.utf8))) == 7)
-        #expect(LumeCloudClient.seq(from: .string("pong")) == nil)
-        #expect(LumeCloudClient.seq(from: .string(#"{"type":"other","seq":1}"#)) == nil)
-        #expect(LumeCloudClient.seq(from: .string(#"{"type":"seq"}"#)) == nil)
+        #expect(StreamenCloudClient.seq(from: .string(#"{"type":"seq","seq":44}"#)) == 44)
+        #expect(StreamenCloudClient.seq(from: .data(Data(#"{"seq":7}"#.utf8))) == 7)
+        #expect(StreamenCloudClient.seq(from: .string("pong")) == nil)
+        #expect(StreamenCloudClient.seq(from: .string(#"{"type":"other","seq":1}"#)) == nil)
+        #expect(StreamenCloudClient.seq(from: .string(#"{"type":"seq"}"#)) == nil)
     }
 
     @Test func eventsWithoutCredentialsThrows() async {
-        let client = LumeCloudClient(baseURL: URL(string: "https://cloud.example")!, credentials: nil)
-        await #expect(throws: LumeCloudError.missingCredentials) {
+        let client = StreamenCloudClient(baseURL: URL(string: "https://cloud.example")!, credentials: nil)
+        await #expect(throws: StreamenCloudError.missingCredentials) {
             for try await _ in client.events() {}
         }
     }
@@ -445,7 +445,7 @@ struct ClientTests {
     // MARK: Error mapping
 
     @Test(arguments: [
-        (400, "bad_request", LumeCloudError.badRequest(message: "m")),
+        (400, "bad_request", StreamenCloudError.badRequest(message: "m")),
         (401, "bad_auth", .badAuth),
         (401, "device_revoked", .deviceRevoked),
         (403, "signup_closed", .signupClosed),
@@ -460,27 +460,27 @@ struct ClientTests {
         (500, "internal", .server(status: 500, code: "internal")),
         (418, "teapot", .server(status: 418, code: "teapot")),
     ])
-    func errorCodesMapToTypedCases(status: Int, code: String, expected: LumeCloudError) async {
+    func errorCodesMapToTypedCases(status: Int, code: String, expected: StreamenCloudError) async {
         let client = makeClient { _ in Self.error(status, code) }
         await #expect(throws: expected) { try await client.account() }
     }
 
     @Test func retryAfterIsParsed() async {
         let client = makeClient { _ in Self.error(429, "rate_limited", headers: ["Retry-After": "17"]) }
-        await #expect(throws: LumeCloudError.rateLimited(retryAfter: 17)) { try await client.changes(since: 0) }
+        await #expect(throws: StreamenCloudError.rateLimited(retryAfter: 17)) { try await client.changes(since: 0) }
     }
 
     @Test func retryAfterAsHTTPDate() {
         let now = Date(timeIntervalSince1970: 1_760_000_000)
         let later = "Thu, 09 Oct 2025 08:54:20 GMT" // now + 60 s
-        #expect(LumeCloudError.parseRetryAfter(later, now: now) == 60)
-        #expect(LumeCloudError.parseRetryAfter("garbage", now: now) == nil)
-        #expect(LumeCloudError.parseRetryAfter(nil, now: now) == nil)
+        #expect(StreamenCloudError.parseRetryAfter(later, now: now) == 60)
+        #expect(StreamenCloudError.parseRetryAfter("garbage", now: now) == nil)
+        #expect(StreamenCloudError.parseRetryAfter(nil, now: now) == nil)
     }
 
     @Test func bodilessErrorsMapByStatus() async {
         for (status, expected) in [
-            (429, LumeCloudError.rateLimited(retryAfter: 3)), (401, .badAuth), (404, .notFound),
+            (429, StreamenCloudError.rateLimited(retryAfter: 3)), (401, .badAuth), (404, .notFound),
             (410, .resyncRequired), (413, .recordTooLarge), (507, .quotaExceeded), (400, .badRequest(message: nil)),
             (502, .server(status: 502, code: nil)),
         ] {
@@ -494,7 +494,7 @@ struct ClientTests {
         // whose userInfo carries the (secret-bearing) URL.
         let configuration = URLSessionConfiguration.ephemeral
         configuration.protocolClasses = [StubURLProtocol.self]
-        let client = LumeCloudClient(
+        let client = StreamenCloudClient(
             baseURL: URL(string: "https://unregistered-\(UUID().uuidString).test")!,
             session: URLSession(configuration: configuration),
             credentials: nil
@@ -502,7 +502,7 @@ struct ClientTests {
         do {
             _ = try await client.pairingResult(code: "123456", pollToken: "POLL-SECRET")
             Issue.record("expected a transport error")
-        } catch let error as LumeCloudError {
+        } catch let error as StreamenCloudError {
             guard case let .transport(urlError) = error else {
                 Issue.record("expected .transport, got \(error)")
                 return
@@ -516,11 +516,11 @@ struct ClientTests {
 
     @Test func malformedSuccessBodyIsADecodingError() async {
         let client = makeClient { _ in Self.ok(#"{"accountId":"a"}"#) }
-        await #expect(throws: LumeCloudError.decoding("missing key createdAt")) { try await client.account() }
+        await #expect(throws: StreamenCloudError.decoding("missing key createdAt")) { try await client.account() }
     }
 
     @Test func errorDescriptionsNeverContainCredentials() {
-        let errors: [LumeCloudError] = [
+        let errors: [StreamenCloudError] = [
             .badRequest(message: nil), .badAuth, .deviceRevoked, .signupClosed, .accountDeleted, .notFound,
             .accountExists, .pairingAlreadySealed, .resyncRequired, .recordTooLarge, .rateLimited(retryAfter: 2.2), .quotaExceeded,
             .server(status: 500, code: nil), .transport(URLError(.timedOut)), .decoding("x"), .missingCredentials,
@@ -530,6 +530,6 @@ struct ClientTests {
             #expect(!description.isEmpty)
             #expect(!description.contains("tok-SECRET"))
         }
-        #expect(LumeCloudError.rateLimited(retryAfter: 2.2).errorDescription == "Too many requests. Try again in 3 seconds.")
+        #expect(StreamenCloudError.rateLimited(retryAfter: 2.2).errorDescription == "Too many requests. Try again in 3 seconds.")
     }
 }

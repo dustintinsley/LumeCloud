@@ -1,27 +1,27 @@
 import Foundation
-import LumeCloudKit
+import StreamenCloudKit
 import Testing
 
-/// End-to-end against a real server. Skipped unless `LUME_CLOUD_E2E_URL` is set:
+/// End-to-end against a real server. Skipped unless `STREAMEN_CLOUD_E2E_URL` is set:
 ///
-///     LUME_CLOUD_E2E_URL=https://cloud-staging.getlume.org swift test --filter LiveE2ETests
+///     STREAMEN_CLOUD_E2E_URL=https://cloud-staging.getlume.org swift test --filter LiveE2ETests
 ///
-/// Set `LUME_CLOUD_E2E_INVITE` too for an instance running `SIGNUP=invite`.
+/// Set `STREAMEN_CLOUD_E2E_INVITE` too for an instance running `SIGNUP=invite`.
 /// Every run creates a fresh account and deletes it at the end (also on failure).
 @Suite(
     "Live E2E",
-    .enabled(if: ProcessInfo.processInfo.environment["LUME_CLOUD_E2E_URL"] != nil, "set LUME_CLOUD_E2E_URL to run"),
+    .enabled(if: ProcessInfo.processInfo.environment["STREAMEN_CLOUD_E2E_URL"] != nil, "set STREAMEN_CLOUD_E2E_URL to run"),
     .serialized
 )
 struct LiveE2ETests {
     struct Timeout: Error {}
 
     static var baseURL: URL {
-        URL(string: ProcessInfo.processInfo.environment["LUME_CLOUD_E2E_URL"]!)!
+        URL(string: ProcessInfo.processInfo.environment["STREAMEN_CLOUD_E2E_URL"]!)!
     }
 
     static var invite: String? {
-        ProcessInfo.processInfo.environment["LUME_CLOUD_E2E_INVITE"]
+        ProcessInfo.processInfo.environment["STREAMEN_CLOUD_E2E_INVITE"]
     }
 
     static func withTimeout<T: Sendable>(_ seconds: Double, _ operation: @escaping @Sendable () async throws -> T) async throws -> T {
@@ -38,12 +38,12 @@ struct LiveE2ETests {
     }
 
     @Test func fullFlow() async throws {
-        let anonymous = LumeCloudClient(baseURL: Self.baseURL, credentials: nil)
+        let anonymous = StreamenCloudClient(baseURL: Self.baseURL, credentials: nil)
         let health = try await anonymous.health()
         #expect(health.ok)
 
         // Account + device A. The account id is derived from the root key.
-        let keys = LumeCloudKeys.generate()
+        let keys = StreamenCloudKeys.generate()
         let created = try await anonymous.createAccount(keys: keys, invite: Self.invite)
         #expect(created.accountId == keys.accountId)
         #expect(created.accountId.count == 22)
@@ -52,7 +52,7 @@ struct LiveE2ETests {
 
         do {
             // The same keys can't create a second account.
-            await #expect(throws: LumeCloudError.accountExists) {
+            await #expect(throws: StreamenCloudError.accountExists) {
                 try await anonymous.createAccount(keys: keys, invite: Self.invite)
             }
             try await runFlow(clientA: clientA, anonymous: anonymous, keys: keys, accountId: created.accountId, deviceA: deviceA)
@@ -63,13 +63,13 @@ struct LiveE2ETests {
 
         // Delete the account; every later call reads as deleted.
         try await clientA.deleteAccount()
-        await #expect(throws: LumeCloudError.accountDeleted) { try await clientA.account() }
+        await #expect(throws: StreamenCloudError.accountDeleted) { try await clientA.account() }
     }
 
     private func runFlow(
-        clientA: LumeCloudClient,
-        anonymous: LumeCloudClient,
-        keys: LumeCloudKeys,
+        clientA: StreamenCloudClient,
+        anonymous: StreamenCloudClient,
+        keys: StreamenCloudKeys,
         accountId: String,
         deviceA: UUID
     ) async throws {
@@ -90,10 +90,10 @@ struct LiveE2ETests {
 
         // Push two sealed payloads.
         let profileID = UUID().uuidString
-        let profile = LumeCloudPayload(type: "profile", key: "profile/\(profileID)", data: [
+        let profile = StreamenCloudPayload(type: "profile", key: "profile/\(profileID)", data: [
             "id": .string(profileID), "name": "E2E", "sortOrder": 0, "isChild": false, "updatedAt": 1,
         ])
-        let content = LumeCloudPayload(type: "content", key: "content/\(profileID)/movie-e2e", data: [
+        let content = StreamenCloudPayload(type: "content", key: "content/\(profileID)/movie-e2e", data: [
             "contentId": "movie-e2e", "kindRaw": "movie", "watchProgress": 42.5, "isFavorite": true, "updatedAt": 2,
         ])
         let sealedProfile = try keys.seal(profile)
@@ -150,7 +150,7 @@ struct LiveE2ETests {
         #expect(tombstone.ciphertext == nil)
 
         // Pairing: a second device joins with its own key pair.
-        let (privateKey, publicKey) = LumeCloudPairing.makeKeyPair()
+        let (privateKey, publicKey) = StreamenCloudPairing.makeKeyPair()
         let ticket = try await anonymous.startPairing(publicKey: publicKey, deviceName: "E2E B", platform: .current)
         #expect(ticket.code.count == 6)
         #expect(try await anonymous.pairingResult(code: ticket.code, pollToken: ticket.pollToken) == .pending)
@@ -158,10 +158,10 @@ struct LiveE2ETests {
         let request = try await clientA.pairingRequest(code: ticket.code)
         #expect(request.publicKey == publicKey)
         #expect(request.deviceName == "E2E B")
-        let grant = LumeCloudGrant(accountId: accountId, rootKey: keys.rootKey, serverURL: Self.baseURL)
-        let sealedGrant = try LumeCloudPairing.seal(grant, to: request.publicKey, code: ticket.code)
+        let grant = StreamenCloudGrant(accountId: accountId, rootKey: keys.rootKey, serverURL: Self.baseURL)
+        let sealedGrant = try StreamenCloudPairing.seal(grant, to: request.publicKey, code: ticket.code)
         try await clientA.sealPairing(code: ticket.code, sealed: sealedGrant)
-        await #expect(throws: LumeCloudError.pairingAlreadySealed) {
+        await #expect(throws: StreamenCloudError.pairingAlreadySealed) {
             try await clientA.sealPairing(code: ticket.code, sealed: sealedGrant)
         }
 
@@ -173,13 +173,13 @@ struct LiveE2ETests {
             }
             try await Task.sleep(for: .seconds(2))
         }
-        let opened = try LumeCloudPairing.open(#require(received), privateKey: privateKey, code: ticket.code)
+        let opened = try StreamenCloudPairing.open(#require(received), privateKey: privateKey, code: ticket.code)
         #expect(opened == grant)
 
         let keysB = try opened.keys()
         #expect(keysB == keys)
         let deviceB = UUID()
-        let clientB = LumeCloudClient(
+        let clientB = StreamenCloudClient(
             baseURL: opened.serverURL,
             credentials: .init(accountId: opened.accountId, keys: keysB, deviceID: deviceB)
         )
@@ -195,11 +195,11 @@ struct LiveE2ETests {
 
         // Revoking B locks it out.
         try await clientA.revokeDevice(id: deviceB)
-        await #expect(throws: LumeCloudError.deviceRevoked) { try await clientB.account() }
+        await #expect(throws: StreamenCloudError.deviceRevoked) { try await clientB.account() }
 
         // Restore from the recovery key alone (§4.8): derive keys + account id,
         // then register a fresh device id.
-        let restoredKeys = try LumeCloudRecoveryKey.keys(from: LumeCloudRecoveryKey.encode(keys))
+        let restoredKeys = try StreamenCloudRecoveryKey.keys(from: StreamenCloudRecoveryKey.encode(keys))
         let deviceC = UUID()
         let clientC = anonymous.withCredentials(.init(keys: restoredKeys, deviceID: deviceC))
         _ = try await clientC.registerDevice(id: deviceC, name: "E2E C", platform: .current)

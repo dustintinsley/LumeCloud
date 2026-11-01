@@ -61,8 +61,8 @@ CREATE INDEX IF NOT EXISTS records_tombstones ON records(updated_at) WHERE delet
 `;
 
 /** Internal headers the Worker sets when it forwards the socket upgrade. */
-export const SOCKET_VERIFIER_HEADER = "x-lume-internal-verifier";
-export const SOCKET_DEVICE_HEADER = "x-lume-internal-device";
+export const SOCKET_VERIFIER_HEADER = "x-streamen-internal-verifier";
+export const SOCKET_DEVICE_HEADER = "x-streamen-internal-device";
 
 /** WebSocket close codes (application range). */
 const CLOSE_DEVICE_REVOKED = 4401;

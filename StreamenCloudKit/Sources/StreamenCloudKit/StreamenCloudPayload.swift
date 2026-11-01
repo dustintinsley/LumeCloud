@@ -8,7 +8,7 @@ import Foundation
 /// models is the app's job. Unknown fields inside `data` survive a
 /// `decode` → `encoded()` round trip verbatim, and so do unknown top-level
 /// fields (kept in `extra`), so a newer client's additions are never lost.
-public struct LumeCloudPayload: Sendable, Hashable {
+public struct StreamenCloudPayload: Sendable, Hashable {
     /// The payload schema version this Kit writes.
     public static let currentVersion = 1
 
@@ -27,7 +27,7 @@ public struct LumeCloudPayload: Sendable, Hashable {
     static let reservedKeys: Set<String> = ["v", "type", "key", "data"]
 
     public init(
-        v: Int = LumeCloudPayload.currentVersion,
+        v: Int = StreamenCloudPayload.currentVersion,
         type: String,
         key: String,
         data: [String: JSONValue],
@@ -54,29 +54,29 @@ public struct LumeCloudPayload: Sendable, Hashable {
     /// Parses a decrypted payload. Throws `.invalidPayload` when it isn't a
     /// JSON object with an integer `v`, string `type` and `key`, and an object
     /// `data`.
-    public static func decode(_ data: Data) throws -> LumeCloudPayload {
+    public static func decode(_ data: Data) throws -> StreamenCloudPayload {
         let value: JSONValue
         do {
             value = try JSONDecoder().decode(JSONValue.self, from: data)
         } catch {
-            throw LumeCloudCryptoError.invalidPayload("not JSON")
+            throw StreamenCloudCryptoError.invalidPayload("not JSON")
         }
         guard case let .object(object) = value else {
-            throw LumeCloudCryptoError.invalidPayload("not an object")
+            throw StreamenCloudCryptoError.invalidPayload("not an object")
         }
         guard let version = object["v"]?.intValue else {
-            throw LumeCloudCryptoError.invalidPayload("missing v")
+            throw StreamenCloudCryptoError.invalidPayload("missing v")
         }
         guard let type = object["type"]?.stringValue else {
-            throw LumeCloudCryptoError.invalidPayload("missing type")
+            throw StreamenCloudCryptoError.invalidPayload("missing type")
         }
         guard let key = object["key"]?.stringValue else {
-            throw LumeCloudCryptoError.invalidPayload("missing key")
+            throw StreamenCloudCryptoError.invalidPayload("missing key")
         }
         guard let fields = object["data"]?.objectValue else {
-            throw LumeCloudCryptoError.invalidPayload("missing data")
+            throw StreamenCloudCryptoError.invalidPayload("missing data")
         }
-        return LumeCloudPayload(
+        return StreamenCloudPayload(
             v: version,
             type: type,
             key: key,
@@ -86,16 +86,16 @@ public struct LumeCloudPayload: Sendable, Hashable {
     }
 }
 
-extension LumeCloudKeys {
+extension StreamenCloudKeys {
     /// Canonically encodes `payload`, derives its `rid` from `payload.key`,
     /// and seals it. Returns both, ready for a `PushRecord`.
-    public func seal(_ payload: LumeCloudPayload) throws -> (rid: String, ciphertext: String) {
+    public func seal(_ payload: StreamenCloudPayload) throws -> (rid: String, ciphertext: String) {
         let rid = recordID(for: payload.key)
         return try (rid, seal(payload.encoded(), rid: rid))
     }
 
     /// Opens and parses a record's ciphertext.
-    public func openPayload(_ wire: String, rid: String) throws -> LumeCloudPayload {
-        try LumeCloudPayload.decode(open(wire, rid: rid))
+    public func openPayload(_ wire: String, rid: String) throws -> StreamenCloudPayload {
+        try StreamenCloudPayload.decode(open(wire, rid: rid))
     }
 }

@@ -2,7 +2,7 @@ import Foundation
 
 /// Local failures of the key, envelope, payload, recovery-key and pairing
 /// helpers. None of them carries key material, plaintext or tokens.
-public enum LumeCloudCryptoError: Error, Sendable, Equatable {
+public enum StreamenCloudCryptoError: Error, Sendable, Equatable {
     /// A key or nonce has the wrong length (the associated value is the length that was expected).
     case invalidKeyLength(expected: Int)
     /// A value that should be base64url without padding isn't.
@@ -26,7 +26,7 @@ public enum LumeCloudCryptoError: Error, Sendable, Equatable {
     case nonFiniteNumber
 }
 
-extension LumeCloudCryptoError: LocalizedError {
+extension StreamenCloudCryptoError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case let .invalidKeyLength(expected):

@@ -1,6 +1,6 @@
-# Lume Cloud — server
+# Streamen Cloud — server
 
-The sync backend for [Lume](https://github.com/bilipp/Lume): an end-to-end
+The sync backend for [Streamen](https://github.com/bilipp/Lume): an end-to-end
 encrypted, zero-knowledge store for user data (playlists, watch progress,
 favorites, profiles, …). It runs on **Cloudflare Workers + SQLite-backed
 Durable Objects**, written in TypeScript.
@@ -101,8 +101,8 @@ Environments live in `wrangler.jsonc`. The top level is local-only.
 
 | Env | Worker | Domain |
 |---|---|---|
-| `staging` | `lume-cloud-staging` | `https://cloud-staging.getlume.org` |
-| `production` | `lume-cloud` | `https://cloud.getlume.org` |
+| `staging` | `streamen-cloud-staging` | `https://cloud-staging.getlume.org` |
+| `production` | `streamen-cloud` | `https://cloud.getlume.org` |
 
 ```bash
 npx wrangler login                      # once, or export CLOUDFLARE_API_TOKEN
@@ -144,7 +144,7 @@ Free).
    "Open or invite?" in the [top-level README](../README.md#configuration).
 4. Keep `DO_JURISDICTION` at `eu` unless you have a reason to pick another
    jurisdiction, and decide **before** the first account is created.
-5. `npm run deploy:production`, then build the apps with `LUME_CLOUD_URL` set
+5. `npm run deploy:production`, then build the apps with `STREAMEN_CLOUD_URL` set
    to your URL (there is no in-app setting; see
    [Connecting the app](../README.md#connecting-the-app)).
 
@@ -155,7 +155,7 @@ the open-source Workers runtime, without a Cloudflare account. Quick start with
 Compose (from this directory):
 
 ```bash
-cp .env.example .env                      # set SIGNUP, INVITE_CODE, LUME_DOMAIN
+cp .env.example .env                      # set SIGNUP, INVITE_CODE, STREAMEN_DOMAIN
 docker compose --profile caddy up -d      # server + Caddy with automatic HTTPS
 docker compose up -d                      # or: server only, on 127.0.0.1:8787
 ```
@@ -163,9 +163,9 @@ docker compose up -d                      # or: server only, on 127.0.0.1:8787
 Without Compose:
 
 ```bash
-docker build -t lume-cloud --build-arg VERSION=$(git describe --tags --always) .
-docker run -d --name lume-cloud --restart unless-stopped \
-  -p 127.0.0.1:8787:8787 -v lume-data:/data -e SIGNUP=open lume-cloud
+docker build -t streamen-cloud --build-arg VERSION=$(git describe --tags --always) .
+docker run -d --name streamen-cloud --restart unless-stopped \
+  -p 127.0.0.1:8787:8787 -v streamen-data:/data -e SIGNUP=open streamen-cloud
 ```
 
 There is no prebuilt image; build it from the checkout you run. It builds for
@@ -181,7 +181,7 @@ the host's architecture (amd64 or arm64).
   [`docker/ratelimit.js`](docker/ratelimit.js). It runs as an unprivileged
   user and listens on port 8787. A `HEALTHCHECK` polls `/healthz`.
 - **Storage:** every Durable Object is a SQLite file under `/data`, one
-  directory per class (`lume-cloud-AccountDO/`, …). Alarms (inactivity purge,
+  directory per class (`streamen-cloud-AccountDO/`, …). Alarms (inactivity purge,
   compaction, pairing expiry) are kept there too and survive restarts.
 - **Configuration:** `SIGNUP`, `INVITE_CODE` and `VERSION` come from the
   container environment. Without `SIGNUP` the server is invite-only, and
@@ -191,7 +191,7 @@ the host's architecture (amd64 or arm64).
   in memory by `docker/ratelimit.js`. Counters reset on restart. The daily
   signup cap lives in `SignupGuardDO` and is persisted.
 - **Logs:** the same one-JSON-line-per-request log, on stdout
-  (`docker compose logs -f lume-cloud`).
+  (`docker compose logs -f streamen-cloud`).
 
 `docker/config.capnp` mirrors the top-level bindings of `wrangler.jsonc`.
 When you add a binding or a Durable Object class, or change a rate limit,
@@ -229,14 +229,14 @@ There is no point-in-time recovery outside Cloudflare, so back up the volume.
 Stop the server first so the SQLite files are consistent:
 
 ```bash
-docker compose stop lume-cloud
-docker run --rm -v lume-cloud_lume-data:/data -v "$PWD":/backup debian:bookworm-slim \
-  tar czf /backup/lume-data-$(date +%F).tgz -C /data .
-docker compose start lume-cloud
+docker compose stop streamen-cloud
+docker run --rm -v streamen-cloud_streamen-data:/data -v "$PWD":/backup debian:bookworm-slim \
+  tar czf /backup/streamen-data-$(date +%F).tgz -C /data .
+docker compose start streamen-cloud
 ```
 
 Restore into an empty volume the same way with
-`tar xzf /backup/lume-data-….tgz -C /data`, then `chown -R 10001 /data` in the
+`tar xzf /backup/streamen-data-….tgz -C /data`, then `chown -R 10001 /data` in the
 same throwaway container. A restore rewinds every account, so clients see
 older `seq`s and do a full resync.
 
@@ -259,7 +259,7 @@ Worker. A restore uses a small, temporary operator Worker (`admin/`) that binds
 to the main Worker's `AccountDO` class and calls its `pitrRestore()` RPC. PITR
 isn't available locally; rehearse on staging first.
 
-1. Get the `accountId` from the user (Settings ▸ Lume Cloud shows it) and the
+1. Get the `accountId` from the user (Settings ▸ Streamen Cloud shows it) and the
    UTC time to restore to. Restoring rewinds **everything** in that account:
    records, devices, revocations, the change feed. Clients then see older
    `seq`s, so tell the user to expect a full resync.
@@ -274,7 +274,7 @@ isn't available locally; rehearse on staging first.
 3. Restore (it prints the bookmark used and an `undoBookmark`; keep both):
 
    ```bash
-   curl -X POST https://lume-cloud-admin-staging.<subdomain>.workers.dev/restore \
+   curl -X POST https://streamen-cloud-admin-staging.<subdomain>.workers.dev/restore \
      -H "Authorization: Bearer $ADMIN_TOKEN" -H 'content-type: application/json' \
      -d '{"accountId":"<22-char id>","at":<epoch ms>}'
    ```
@@ -298,12 +298,12 @@ root key, and record envelopes are bound to their `rid` only, so ciphertext is
 copied byte for byte without decrypting anything. No dependencies.
 
 ```bash
-LUME_RECOVERY_KEY='XXXX-XXXX-…' node scripts/migrate-account.mjs \
+STREAMEN_RECOVERY_KEY='XXXX-XXXX-…' node scripts/migrate-account.mjs \
   --from https://cloud-staging.getlume.org --to https://cloud.getlume.org --dry-run
 # then without --dry-run; add --delete-source to remove the source copy afterwards
 ```
 
-Without `LUME_RECOVERY_KEY` it asks for the key (hidden input). It creates the
+Without `STREAMEN_RECOVERY_KEY` it asks for the key (hidden input). It creates the
 account on the destination (`--invite` for invite-only servers), pushes every
 live record, verifies that each one arrived unchanged, registers the source's
 devices there (revoked ones stay revoked; `createdAt`/`lastSeen` restart), and

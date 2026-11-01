@@ -128,7 +128,7 @@
     }
   ],
   "defaultProfileId" : "00000000-0000-0000-0000-0000DEFA0117",
-  "format" : "lume-cloud-identity-vectors",
+  "format" : "streamen-cloud-identity-vectors",
   "hashes" : [
     {
       "hash64" : "14695981039346656037",
@@ -236,7 +236,7 @@
     },
     {
       "hash64" : "7305175192649614038",
-      "input" : "📺 Lume",
+      "input" : "📺 Streamen",
       "inputUTF8Hex" : "f09f93ba204c756d65",
       "key" : "1ji1ohe2dht5i",
       "mediaServerHash" : "7305175192649614038",

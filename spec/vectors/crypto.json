@@ -1,22 +1,22 @@
 {
-  "format" : "lume-cloud-crypto-vectors",
+  "format" : "streamen-cloud-crypto-vectors",
   "keys" : {
     "accountId" : "cbm-snbxbUtTCAM8n_puuA",
-    "accountIdInfo" : "lume-cloud/v1/account",
+    "accountIdInfo" : "streamen-cloud/v1/account",
     "authKey" : {
-      "info" : "lume-cloud/v1/auth",
+      "info" : "streamen-cloud/v1/auth",
       "value" : "Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY"
     },
     "authToken" : "Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY",
     "authVerifier" : "Xa2C5IEgh90MuDpcLkDA-i46mFdi_kaokB13ETS505I",
     "authorizationHeader" : "Bearer cbm-snbxbUtTCAM8n_puuA.Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY",
     "encKey" : {
-      "info" : "lume-cloud/v1/enc",
+      "info" : "streamen-cloud/v1/enc",
       "value" : "f18CI76RBI0GwrkRzvUTAmFlxasz6lkd0HsHKk3ShOU"
     },
     "hkdf" : "HKDF-SHA256, salt = empty, L = 32",
     "idKey" : {
-      "info" : "lume-cloud/v1/id",
+      "info" : "streamen-cloud/v1/id",
       "value" : "f11yudjFP1b3yoGlAEH0IEM6iFrBAWwYadfc6qdH-qU"
     },
     "rootKey" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
@@ -43,7 +43,7 @@
       "rootKey" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
       "serverURL" : "https://cloud-staging.getlume.org"
     },
-    "info" : "lume-cloud/v1/pairing",
+    "info" : "streamen-cloud/v1/pairing",
     "recipientPrivateKey" : "ICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj8",
     "recipientPublicKey" : "NYBy1jZYgNGu6jKa35EhODhR7SGijjt16WXQ0s0WYlQ",
     "suite" : "DHKEM(X25519, HKDF-SHA256) / HKDF-SHA256 / AES-256-GCM"

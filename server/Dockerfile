@@ -1,8 +1,8 @@
-# Lume Cloud on plain workerd (the open-source Workers runtime), for
+# Streamen Cloud on plain workerd (the open-source Workers runtime), for
 # self-hosting without a Cloudflare account. See "Docker" in README.md.
 #
-#   docker build -t lume-cloud .
-#   docker run -p 8787:8787 -v lume-data:/data -e SIGNUP=open lume-cloud
+#   docker build -t streamen-cloud .
+#   docker run -p 8787:8787 -v streamen-data:/data -e SIGNUP=open streamen-cloud
 
 FROM node:22-bookworm-slim AS build
 WORKDIR /src
@@ -18,8 +18,8 @@ FROM debian:bookworm-slim
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates \
  && rm -rf /var/lib/apt/lists/* \
- && useradd --system --uid 10001 --home-dir /app lume \
- && mkdir -p /data && chown lume /data
+ && useradd --system --uid 10001 --home-dir /app streamen \
+ && mkdir -p /data && chown streamen /data
 WORKDIR /app
 COPY --from=build /workerd /usr/local/bin/workerd
 COPY --from=build /src/dist/index.js ./dist/index.js
@@ -28,7 +28,7 @@ COPY docker/config.capnp docker/ratelimit.js ./
 ARG VERSION=docker
 ENV VERSION=${VERSION} \
     SIGNUP=invite
-USER lume
+USER streamen
 VOLUME /data
 EXPOSE 8787
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \

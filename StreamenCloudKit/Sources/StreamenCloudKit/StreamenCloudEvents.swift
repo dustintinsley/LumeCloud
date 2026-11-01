@@ -3,13 +3,13 @@ import Foundation
     import FoundationNetworking
 #endif
 
-extension LumeCloudClient {
+extension StreamenCloudClient {
     /// Opens `GET /v1/socket` (PROTOCOL.md §4.6) and yields the account's
     /// feed `seq` every time it advances. Pull `/changes` when one arrives.
     ///
     /// - Sends the text `ping` every 30 s; `pong` replies are swallowed.
     /// - Finishes when the server closes normally, and throws
-    ///   `LumeCloudError` for anything else (a failed upgrade maps by HTTP
+    ///   `StreamenCloudError` for anything else (a failed upgrade maps by HTTP
     ///   status, so a 401 reads as `.badAuth` and a 404 as `.notFound` —
     ///   pull `/changes` for the precise code).
     /// - Never reconnects on its own. The socket is only a hint: keep pulling
@@ -94,19 +94,19 @@ extension LumeCloudClient {
         return value["seq"]?.intValue
     }
 
-    /// Maps a socket failure (anything but a normal close) to `LumeCloudError`.
-    static func socketError(_ error: any Error, task: URLSessionWebSocketTask) -> LumeCloudError {
+    /// Maps a socket failure (anything but a normal close) to `StreamenCloudError`.
+    static func socketError(_ error: any Error, task: URLSessionWebSocketTask) -> StreamenCloudError {
         if let http = task.response as? HTTPURLResponse, http.statusCode != 101 {
-            return LumeCloudError.from(
+            return StreamenCloudError.from(
                 status: http.statusCode,
                 body: Data(),
                 retryAfter: http.value(forHTTPHeaderField: "Retry-After")
             )
         }
         if let urlError = error as? URLError {
-            return LumeCloudError.sanitizedTransport(urlError)
+            return StreamenCloudError.sanitizedTransport(urlError)
         }
         // POSIX errors and abnormal close codes: the connection is gone.
-        return LumeCloudError.transport(URLError(.networkConnectionLost))
+        return StreamenCloudError.transport(URLError(.networkConnectionLost))
     }
 }

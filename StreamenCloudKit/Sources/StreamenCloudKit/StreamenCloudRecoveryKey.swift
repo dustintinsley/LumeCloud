@@ -1,6 +1,6 @@
 import Foundation
 
-/// The human-readable rendering of the 32-byte root key, for Settings ▸ Lume
+/// The human-readable rendering of the 32-byte root key, for Settings ▸ Streamen
 /// Cloud ▸ Recovery key.
 ///
 /// Format: the 256 key bits, big-endian, packed into 52 Crockford base32
@@ -15,22 +15,22 @@ import Foundation
 /// Decoding is case-insensitive, maps `I`/`L` → `1` and `O` → `0`, and
 /// ignores dashes and whitespace. The check symbol catches every single-symbol
 /// typo and every swap of two adjacent symbols.
-public enum LumeCloudRecoveryKey {
+public enum StreamenCloudRecoveryKey {
     static let alphabet = Array("0123456789ABCDEFGHJKMNPQRSTVWXYZ")
     static let checkAlphabet = alphabet + Array("*~$=U")
     static let dataSymbolCount = 52
     static let groupSize = 4
 
     /// The grouped recovery key for `keys.rootKey`.
-    public static func encode(_ keys: LumeCloudKeys) -> String {
-        // `LumeCloudKeys` guarantees 32 bytes.
+    public static func encode(_ keys: StreamenCloudKeys) -> String {
+        // `StreamenCloudKeys` guarantees 32 bytes.
         try! encode(rootKey: keys.rootKey) // swiftlint:disable:this force_try
     }
 
     /// The grouped recovery key for a 32-byte root key.
     public static func encode(rootKey: Data) throws -> String {
-        guard rootKey.count == LumeCloudKeys.keyByteCount else {
-            throw LumeCloudCryptoError.invalidKeyLength(expected: LumeCloudKeys.keyByteCount)
+        guard rootKey.count == StreamenCloudKeys.keyByteCount else {
+            throw StreamenCloudCryptoError.invalidKeyLength(expected: StreamenCloudKeys.keyByteCount)
         }
         var digits: [Int] = []
         digits.reserveCapacity(dataSymbolCount)
@@ -69,23 +69,23 @@ public enum LumeCloudRecoveryKey {
             symbols.append(character)
         }
         guard symbols.count == dataSymbolCount + 1 else {
-            throw LumeCloudCryptoError.invalidRecoveryKey
+            throw StreamenCloudCryptoError.invalidRecoveryKey
         }
         let digits = try symbols.dropLast().map { symbol in
             guard let value = dataValue(of: symbol) else {
-                throw LumeCloudCryptoError.invalidRecoveryKey
+                throw StreamenCloudCryptoError.invalidRecoveryKey
             }
             return value
         }
         guard let check = checkValue(of: symbols[symbols.count - 1]) else {
-            throw LumeCloudCryptoError.invalidRecoveryKey
+            throw StreamenCloudCryptoError.invalidRecoveryKey
         }
         guard check == checksum(digits) else {
-            throw LumeCloudCryptoError.recoveryKeyChecksumMismatch
+            throw StreamenCloudCryptoError.recoveryKeyChecksumMismatch
         }
 
         var bytes = Data()
-        bytes.reserveCapacity(LumeCloudKeys.keyByteCount)
+        bytes.reserveCapacity(StreamenCloudKeys.keyByteCount)
         var buffer = 0
         var bitCount = 0
         for digit in digits {
@@ -98,15 +98,15 @@ public enum LumeCloudRecoveryKey {
             }
         }
         // The four padding bits of the last symbol must be zero.
-        guard bytes.count == LumeCloudKeys.keyByteCount, buffer == 0 else {
-            throw LumeCloudCryptoError.invalidRecoveryKey
+        guard bytes.count == StreamenCloudKeys.keyByteCount, buffer == 0 else {
+            throw StreamenCloudCryptoError.invalidRecoveryKey
         }
         return bytes
     }
 
-    /// The root key as `LumeCloudKeys`.
-    public static func keys(from string: String) throws -> LumeCloudKeys {
-        try LumeCloudKeys(rootKey: decode(string))
+    /// The root key as `StreamenCloudKeys`.
+    public static func keys(from string: String) throws -> StreamenCloudKeys {
+        try StreamenCloudKeys(rootKey: decode(string))
     }
 
     // MARK: - Helpers

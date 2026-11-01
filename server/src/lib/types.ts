@@ -4,7 +4,7 @@
 export interface AuthContext {
 	/** base64url(SHA-256(authKey)), computed by the Worker. */
 	verifier: string;
-	/** X-Lume-Device, or null on routes that don't require it. */
+	/** X-Streamen-Device, or null on routes that don't require it. */
 	deviceId: string | null;
 }
 

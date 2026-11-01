@@ -37,5 +37,5 @@ export function pairingStub(env: Env, code: string): DurableObjectStub<PairingDO
 /** The guard is keyed by a hash of the IP key so raw IPs never become object names. */
 export async function signupGuardStub(env: Env, ipKey: string): Promise<DurableObjectStub<SignupGuardDO>> {
 	const ns = scoped(env, env.SIGNUP_GUARD);
-	return ns.get(ns.idFromName(`signup:${await sha256B64url(`lume-cloud/v1/signup-guard:${ipKey}`)}`));
+	return ns.get(ns.idFromName(`signup:${await sha256B64url(`streamen-cloud/v1/signup-guard:${ipKey}`)}`));
 }

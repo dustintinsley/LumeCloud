@@ -1,8 +1,8 @@
-# Lume Cloud protocol — v1
+# Streamen Cloud protocol — v1
 
-This is the wire contract between the Lume Cloud server (`server/`, a
-Cloudflare Worker) and every client: Apple (`LumeCloudKit/`, Swift) and Android
-(LumeAndroid, Kotlin). It is normative. If an implementation disagrees with
+This is the wire contract between the Streamen Cloud server (`server/`, a
+Cloudflare Worker) and every client: Apple (`StreamenCloudKit/`, Swift) and Android
+(StreamenAndroid, Kotlin). It is normative. If an implementation disagrees with
 this file, the implementation is wrong. Changes within v1 are **additive only**.
 
 The server is **zero-knowledge**. It stores opaque encrypted records and a
@@ -28,13 +28,13 @@ ids.
 |---|---|---|
 | 400 | `bad_request` | Malformed JSON, missing fields, or a bad base64url value |
 | 401 | `bad_auth` | Missing or wrong credentials |
-| 401 | `device_revoked` | This device was revoked. Stop syncing and show "removed from Lume Cloud". |
+| 401 | `device_revoked` | This device was revoked. Stop syncing and show "removed from Streamen Cloud". |
 | 403 | `signup_closed` | `SIGNUP=invite`, and the invite code is missing or wrong |
 | 404 | `account_deleted` | The account doesn't exist (deleted, purged, or never existed). The client switches to local-only and keeps its local data. |
 | 404 | `not_found` | Unknown route, or the pairing code expired or doesn't exist |
 | 409 | `account_exists` | `POST /accounts`: an account with this `accountId` already exists. Sign in to it instead (§4.8). |
 | 409 | `pairing_already_sealed` | Someone else already sealed this pairing |
-| 400 | `bad_request` | Also returned when `X-Lume-Device` is missing on a route that requires it |
+| 400 | `bad_request` | Also returned when `X-Streamen-Device` is missing on a route that requires it |
 | 410 | `resync_required` | `since` is older than the tombstone horizon. Do a full resync (§6.3). |
 | 413 | `record_too_large` | A record's ciphertext is larger than 65,536 bytes (decoded), or the push body exceeds the limits |
 | 429 | `rate_limited` | Honour the `Retry-After` header (seconds) |
@@ -54,10 +54,10 @@ All algorithms are available in CryptoKit (Apple) and in JCA/Tink (Android).
 
   | Value | `info` (UTF-8) | Length `L` | Use |
   |---|---|---|---|
-  | `encKey` | `lume-cloud/v1/enc` | 32 bytes | Record envelopes (§2.4) |
-  | `idKey` | `lume-cloud/v1/id` | 32 bytes | Record ids (§2.3) |
-  | `authKey` | `lume-cloud/v1/auth` | 32 bytes | Auth (§2.2) |
-  | `accountId` | `lume-cloud/v1/account` | 16 bytes | `accountId = base64url(HKDF(…))`, 22 characters |
+  | `encKey` | `streamen-cloud/v1/enc` | 32 bytes | Record envelopes (§2.4) |
+  | `idKey` | `streamen-cloud/v1/id` | 32 bytes | Record ids (§2.3) |
+  | `authKey` | `streamen-cloud/v1/auth` | 32 bytes | Auth (§2.2) |
+  | `accountId` | `streamen-cloud/v1/account` | 16 bytes | `accountId = base64url(HKDF(…))`, 22 characters |
 
 - The `accountId` is derived, not assigned: every device holding the root key
   (including one that has only the recovery key, §4.8) computes the same id.
@@ -69,7 +69,7 @@ All algorithms are available in CryptoKit (Apple) and in JCA/Tink (Android).
   and stored by the server.
 - Every authenticated request carries:
   - `Authorization: Bearer <accountId>.<base64url(authKey)>`
-  - `X-Lume-Device: <deviceId>`. This is required on every authenticated
+  - `X-Streamen-Device: <deviceId>`. This is required on every authenticated
     route except `POST /accounts` and `POST /devices` (the latter registers the
     id in its body).
 - The server checks `base64url(SHA-256(authKey)) == authVerifier`, comparing in
@@ -132,7 +132,7 @@ Field names match the Apple mirror models. Optional fields may be absent or
 | `content` | `content/<profileUUID>/<contentId>` | `contentId`, `kindRaw` (`movie`\|`series`\|`episode`\|`live`\|`category`), `profileID` (UUID), `watchProgress` (seconds, double), `isWatched`, `lastWatchedDate?`, `isFavorite`, `addedToWatchlistDate?`, `favoriteOrder?` (int), `isHidden`, `customOrder?` (int), `recommendationVoteRaw` (int: -1, 0 or 1), `updatedAt` |
 | `profile` | `profile/<UUID>` | `id`, `name`, `symbolName`, `colorRaw`, `createdAt`, `sortOrder` (int), `isChild` (bool), `updatedAt` |
 | `epgSource` | `epgSource/<UUID>` | `id`, `name`, `url`, `isEnabled`, `updatedAt` |
-| `parentalPin` | `parentalPin` | `pinHash` (lowercase hex SHA-256 of `"lume.parental.v1" + pin`), `updatedAt` |
+| `parentalPin` | `parentalPin` | `pinHash` (lowercase hex SHA-256 of `"streamen.parental.v1" + pin`), `updatedAt` |
 | `categoryRestriction` | `categoryRestriction/<categoryID>` | `categoryID`, `isRestricted`, `updatedAt` |
 | `sportsFollow` | `sportsFollow/<profileUUID>/<key>` | `key`, `kindRaw`, `profileID`, `sortOrder` (int), `updatedAt` |
 | `recordingServer` | `recordingServer/<UUID>` | `id`, `kindRaw`, `name`, `baseURL`, `serverID?`, `deviceID?`, `token`, `isEnabled`, `updatedAt` |
@@ -266,7 +266,7 @@ needs key rotation, which is v2.
 
 The cipher suite is HPKE (RFC 9180) base mode:
 **DHKEM(X25519, HKDF-SHA256) / HKDF-SHA256 / AES-256-GCM**, with
-`info = UTF8("lume-cloud/v1/pairing")` and `aad = UTF8(code)`.
+`info = UTF8("streamen-cloud/v1/pairing")` and `aad = UTF8(code)`.
 
 CryptoKit has no predefined constant for this suite, so build it explicitly:
 `HPKE.Ciphersuite(kem: .Curve25519_HKDF_SHA256, kdf: .HKDF_SHA256, aead: .AES_GCM_256)`.

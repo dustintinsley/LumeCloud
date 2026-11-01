@@ -3,18 +3,18 @@ import Foundation
     import FoundationNetworking
 #endif
 
-/// Async client for a Lume Cloud server (PROTOCOL.md §4).
+/// Async client for a Streamen Cloud server (PROTOCOL.md §4).
 ///
 /// Stateless and `Sendable`: create one per server and account, and share it
 /// freely from any actor. The client never retries — not on `429`, not on a
 /// transport error, never a `POST` or `DELETE`. Retry policy, backoff and
 /// conflict rounds are the caller's job. The auth token only ever travels in
 /// the `Authorization` header and never appears in an error.
-public final class LumeCloudClient: Sendable {
+public final class StreamenCloudClient: Sendable {
     /// What an authenticated request carries (§2.2).
     public struct Credentials: Sendable, Hashable {
         public var accountId: String
-        /// `base64url(authKey)` — `LumeCloudKeys.authToken`.
+        /// `base64url(authKey)` — `StreamenCloudKeys.authToken`.
         public var authToken: String
         public var deviceID: UUID
 
@@ -24,13 +24,13 @@ public final class LumeCloudClient: Sendable {
             self.deviceID = deviceID
         }
 
-        public init(accountId: String, keys: LumeCloudKeys, deviceID: UUID) {
+        public init(accountId: String, keys: StreamenCloudKeys, deviceID: UUID) {
             self.init(accountId: accountId, authToken: keys.authToken, deviceID: deviceID)
         }
 
         /// Credentials for the account derived from `keys` (`keys.accountId`).
         /// This is all a device restoring from a recovery key needs.
-        public init(keys: LumeCloudKeys, deviceID: UUID) {
+        public init(keys: StreamenCloudKeys, deviceID: UUID) {
             self.init(accountId: keys.accountId, keys: keys, deviceID: deviceID)
         }
 
@@ -57,8 +57,8 @@ public final class LumeCloudClient: Sendable {
 
     /// A copy of this client with other credentials, e.g. right after
     /// `createAccount` or a finished pairing.
-    public func withCredentials(_ credentials: Credentials?) -> LumeCloudClient {
-        LumeCloudClient(baseURL: baseURL, session: session, credentials: credentials, pingInterval: pingInterval)
+    public func withCredentials(_ credentials: Credentials?) -> StreamenCloudClient {
+        StreamenCloudClient(baseURL: baseURL, session: session, credentials: credentials, pingInterval: pingInterval)
     }
 
     // MARK: - Accounts (§4.1)
@@ -70,7 +70,7 @@ public final class LumeCloudClient: Sendable {
     /// Throws `.accountExists` when that account already exists (sign in to
     /// it instead). Pass `invite` only for an invite-only instance; a missing
     /// or wrong one throws `.signupClosed`.
-    public func createAccount(keys: LumeCloudKeys, invite: String? = nil) async throws -> AccountCreated {
+    public func createAccount(keys: StreamenCloudKeys, invite: String? = nil) async throws -> AccountCreated {
         let body = CreateAccountBody(authVerifier: keys.authVerifier, accountId: keys.accountId, invite: invite)
         return try await send(.post, "v1/accounts", body: body, auth: .none)
     }
@@ -96,7 +96,7 @@ public final class LumeCloudClient: Sendable {
 
     /// `POST /v1/devices` — registers or updates a device; idempotent by `id`.
     /// Sends the `Authorization` header only: the id travels in the body.
-    public func registerDevice(id: UUID, name: String, platform: LumeCloudPlatform) async throws -> Device {
+    public func registerDevice(id: UUID, name: String, platform: StreamenCloudPlatform) async throws -> Device {
         let body = RegisterDeviceBody(id: id.uuidString, name: name, platform: platform)
         return try await send(.post, "v1/devices", body: body, auth: .accountOnly)
     }
@@ -155,7 +155,7 @@ public final class LumeCloudClient: Sendable {
     // MARK: - Pairing (§4.5)
 
     /// `POST /v1/pairings` (unauthenticated) — the new device's step 1.
-    public func startPairing(publicKey: String, deviceName: String, platform: LumeCloudPlatform) async throws -> PairingTicket {
+    public func startPairing(publicKey: String, deviceName: String, platform: StreamenCloudPlatform) async throws -> PairingTicket {
         let body = StartPairingBody(publicKey: publicKey, deviceName: deviceName, platform: platform)
         return try await send(.post, "v1/pairings", body: body, auth: .none)
     }
@@ -205,7 +205,7 @@ public final class LumeCloudClient: Sendable {
         case none
         /// `Authorization` only (`POST /v1/devices`).
         case accountOnly
-        /// `Authorization` and `X-Lume-Device`.
+        /// `Authorization` and `X-Streamen-Device`.
         case full
     }
 
@@ -236,10 +236,10 @@ public final class LumeCloudClient: Sendable {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
         if auth != .none {
-            guard let credentials else { throw LumeCloudError.missingCredentials }
+            guard let credentials else { throw StreamenCloudError.missingCredentials }
             request.setValue(credentials.authorizationHeader, forHTTPHeaderField: "Authorization")
             if auth == .full {
-                request.setValue(credentials.deviceID.uuidString, forHTTPHeaderField: LumeCloudAPI.deviceHeader)
+                request.setValue(credentials.deviceID.uuidString, forHTTPHeaderField: StreamenCloudAPI.deviceHeader)
             }
         }
         return request
@@ -251,7 +251,7 @@ public final class LumeCloudClient: Sendable {
         do {
             return try encoder.encode(value)
         } catch {
-            throw LumeCloudError.badRequest(message: "The request couldn't be encoded.")
+            throw StreamenCloudError.badRequest(message: "The request couldn't be encoded.")
         }
     }
 
@@ -268,7 +268,7 @@ public final class LumeCloudClient: Sendable {
         do {
             return try JSONDecoder().decode(Response.self, from: data)
         } catch {
-            throw LumeCloudError.decodingFailure(error)
+            throw StreamenCloudError.decodingFailure(error)
         }
     }
 
@@ -298,13 +298,13 @@ public final class LumeCloudClient: Sendable {
         do {
             (data, response) = try await session.data(for: request)
         } catch let error as URLError {
-            throw LumeCloudError.sanitizedTransport(error)
+            throw StreamenCloudError.sanitizedTransport(error)
         }
         guard let http = response as? HTTPURLResponse else {
-            throw LumeCloudError.decoding("not an HTTP response")
+            throw StreamenCloudError.decoding("not an HTTP response")
         }
         guard !(200 ..< 300).contains(http.statusCode) else { return data }
-        throw LumeCloudError.from(
+        throw StreamenCloudError.from(
             status: http.statusCode,
             body: data,
             retryAfter: http.value(forHTTPHeaderField: "Retry-After")
@@ -312,7 +312,7 @@ public final class LumeCloudClient: Sendable {
     }
 }
 
-extension LumeCloudClient.Credentials: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
+extension StreamenCloudClient.Credentials: CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
     public var description: String { "Credentials(accountId: \(accountId), deviceID: \(deviceID.uuidString), authToken: <redacted>)" }
     public var debugDescription: String { description }
     public var customMirror: Mirror {

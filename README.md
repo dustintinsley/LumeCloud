@@ -1,6 +1,6 @@
-# Lume Cloud
+# Streamen Cloud
 
-Free, **end-to-end encrypted** sync for the [Lume](https://github.com/bilipp/Lume)
+Free, **end-to-end encrypted** sync for the [Streamen](https://github.com/bilipp/Lume)
 IPTV player across Apple platforms and Android. Playlists, credentials, watch
 progress, favorites and profiles stay in step on every device. The official
 instance stores data in the EU, and anyone can run their own server: on
@@ -57,7 +57,7 @@ the sync algorithm, is [`spec/PROTOCOL.md`](spec/PROTOCOL.md).
 |---|---|
 | [`spec/`](spec/) | The wire contract ([`PROTOCOL.md`](spec/PROTOCOL.md)) and cross-platform test vectors. Normative for every client. |
 | [`server/`](server/) | The server (TypeScript): Cloudflare Worker + Durable Objects, plus the Docker image. The official instance runs at `cloud.getlume.org`, staging at `cloud-staging.getlume.org`. Operator docs: [`server/README.md`](server/README.md). |
-| [`LumeCloudKit/`](LumeCloudKit/) | `LumeCloudKit`, the zero-dependency Swift client (CryptoKit). The Lume app consumes it as a local SPM package at `../LumeCloud/LumeCloudKit`. See [`LumeCloudKit/README.md`](LumeCloudKit/README.md). |
+| [`StreamenCloudKit/`](StreamenCloudKit/) | `StreamenCloudKit`, the zero-dependency Swift client (CryptoKit). The Streamen app consumes it as a local SPM package at `../StreamenCloud/StreamenCloudKit`. See [`StreamenCloudKit/README.md`](StreamenCloudKit/README.md). |
 
 The Android client (Kotlin) lives in `bilipp/LumeAndroid` and consumes `spec/`
 as a git submodule.
@@ -82,16 +82,16 @@ the host and ports 80 and 443 reachable from the internet.
 
 ```bash
 git clone https://github.com/bilipp/LumeCloud.git
-cd LumeCloud/server
+cd StreamenCloud/server
 cp .env.example .env
 ```
 
-Edit `.env`: set `LUME_DOMAIN` to your domain and decide on `SIGNUP` (see
+Edit `.env`: set `STREAMEN_DOMAIN` to your domain and decide on `SIGNUP` (see
 [Configuration](#configuration); the apps can't send invite codes yet, so
 `open` is the setting that works with them today).
 
 ```bash
-# Server plus Caddy, which obtains a certificate for LUME_DOMAIN:
+# Server plus Caddy, which obtains a certificate for STREAMEN_DOMAIN:
 docker compose --profile caddy up -d
 
 curl https://cloud.example.com/healthz        # {"ok":true,"version":"docker"}
@@ -103,7 +103,7 @@ WebSocket upgrades on `/v1/socket`, and set the `CF-Connecting-IP` request
 header to the client's address. The server keys its per-IP limits on that
 header, so the proxy must overwrite whatever the client sent.
 
-Data lives in the `lume-cloud_lume-data` volume. Updating:
+Data lives in the `streamen-cloud_streamen-data` volume. Updating:
 
 ```bash
 git pull
@@ -120,7 +120,7 @@ Cloudflare.
 
 ```bash
 git clone https://github.com/bilipp/LumeCloud.git
-cd LumeCloud/server
+cd StreamenCloud/server
 npm install
 npx wrangler login
 ```
@@ -149,11 +149,11 @@ Logging, point-in-time restores and cost notes are in
 | `SIGNUP` | `open` or `invite` | var | `open` lets anyone who can reach the server create an account. `invite` requires `INVITE_CODE`. Unset or any other value counts as `invite`. |
 | `INVITE_CODE` | string | secret | The shared invite code. With `SIGNUP=invite` and no code, signup is closed for everyone. Existing accounts keep working. |
 | `VERSION` | string | set by the deploy scripts | Reported by `/healthz`. |
-| `LUME_DOMAIN` | domain | (`routes` in `wrangler.jsonc`) | Public hostname. Docker: used by the Caddy profile. |
+| `STREAMEN_DOMAIN` | domain | (`routes` in `wrangler.jsonc`) | Public hostname. Docker: used by the Caddy profile. |
 | `PORT` | default `8787` | n/a | Docker: the host port the server binds on `127.0.0.1`. |
 | `DO_JURISDICTION` | fixed to `none` | var, default `eu` | Where Durable Objects live. workerd has no jurisdictions. |
 
-**Open or invite?** The Lume apps don't send an invite code yet, so on an
+**Open or invite?** The Streamen apps don't send an invite code yet, so on an
 `invite` server the apps can't create accounts. Accounts can still arrive
 there through [`migrate-account.mjs --invite`](#moving-an-account-between-servers),
 and once an account exists, devices sign in with its recovery key or by pairing
@@ -168,13 +168,13 @@ Server limits (record size, quotas, retention) are fixed in code; see
 ### Connecting the app
 
 The apps pick their server at build time; there is no setting for it in the
-app. To use your own server, build the app yourself with `LUME_CLOUD_URL` set
+app. To use your own server, build the app yourself with `STREAMEN_CLOUD_URL` set
 to its base URL, e.g. `https://cloud.example.com`:
 
 - **Apple** ([`bilipp/Lume`](https://github.com/bilipp/Lume)): put
-  `LUME_CLOUD_URL=…` in the app's `.env`. `Scripts/inject-env.sh` writes it
+  `STREAMEN_CLOUD_URL=…` in the app's `.env`. `Scripts/inject-env.sh` writes it
   into the Info.plist for every build configuration.
-- **Android** (`bilipp/LumeAndroid`): put `LUME_CLOUD_URL=…` in
+- **Android** (`bilipp/LumeAndroid`): put `STREAMEN_CLOUD_URL=…` in
   `local.properties`. Only debug builds honor it; release builds always use
   `https://cloud.getlume.org`.
 
@@ -190,7 +190,7 @@ anything. It works across Cloudflare and Docker servers alike.
 
 ```bash
 cd server
-LUME_RECOVERY_KEY='XXXX-XXXX-…' node scripts/migrate-account.mjs \
+STREAMEN_RECOVERY_KEY='XXXX-XXXX-…' node scripts/migrate-account.mjs \
   --from https://cloud.getlume.org --to https://cloud.example.com --invite <code> --dry-run
 # then run again without --dry-run; add --delete-source to remove the old copy
 ```
@@ -216,11 +216,11 @@ To try the Docker image locally: `cp .env.example .env && docker compose up -d -
 ### Swift client
 
 ```bash
-cd LumeCloudKit
+cd StreamenCloudKit
 swift test
 
 # Against a running server (wrangler dev, Docker or staging):
-LUME_CLOUD_E2E_URL=http://127.0.0.1:8787 swift test --filter LiveE2ETests
+STREAMEN_CLOUD_E2E_URL=http://127.0.0.1:8787 swift test --filter LiveE2ETests
 ```
 
 ### Changing the protocol

@@ -1,5 +1,5 @@
 import Foundation
-@testable import LumeCloudKit
+@testable import StreamenCloudKit
 import Testing
 
 @Suite("JSONValue & payload")
@@ -69,14 +69,14 @@ struct PayloadTests {
     }
 
     @Test func canonicalRejectsNonFiniteNumbers() {
-        #expect(throws: LumeCloudCryptoError.nonFiniteNumber) { try JSONValue.number(.nan).canonicalJSON() }
-        #expect(throws: LumeCloudCryptoError.nonFiniteNumber) { try JSONValue.number(.infinity).canonicalJSON() }
+        #expect(throws: StreamenCloudCryptoError.nonFiniteNumber) { try JSONValue.number(.nan).canonicalJSON() }
+        #expect(throws: StreamenCloudCryptoError.nonFiniteNumber) { try JSONValue.number(.infinity).canonicalJSON() }
     }
 
     // MARK: Payload
 
     @Test func payloadEncodingIsCanonical() throws {
-        let payload = LumeCloudPayload(
+        let payload = StreamenCloudPayload(
             type: "content",
             key: "content/none/movie-1",
             data: ["watchProgress": 12.25, "isWatched": false, "favoriteOrder": 3, "updatedAt": 1_760_000_000_000, "lastWatchedDate": nil]
@@ -87,7 +87,7 @@ struct PayloadTests {
 
     @Test func payloadPreservesUnknownFields() throws {
         let incoming = #"{"v":1,"type":"profile","key":"profile/X","future":{"k":[1,2]},"data":{"name":"Kid","sortOrder":2,"newField":{"z":1,"a":[true,null,0.5]},"color":"red"}}"#
-        let payload = try LumeCloudPayload.decode(Data(incoming.utf8))
+        let payload = try StreamenCloudPayload.decode(Data(incoming.utf8))
         #expect(payload.v == 1)
         #expect(payload.type == "profile")
         #expect(payload.key == "profile/X")
@@ -98,7 +98,7 @@ struct PayloadTests {
         edited.data["name"] = "Kids"
         let json = try #require(String(bytes: edited.encoded(), encoding: .utf8))
         #expect(json == #"{"data":{"color":"red","name":"Kids","newField":{"a":[true,null,0.5],"z":1},"sortOrder":2},"future":{"k":[1,2]},"key":"profile/X","type":"profile","v":1}"#)
-        #expect(try LumeCloudPayload.decode(edited.encoded()) == edited)
+        #expect(try StreamenCloudPayload.decode(edited.encoded()) == edited)
     }
 
     @Test func payloadRejectsMissingFields() {
@@ -106,19 +106,19 @@ struct PayloadTests {
                     #"{"v":1,"key":"k","data":{}}"#, #"{"v":1,"type":"t","data":{}}"#, #"{"v":1,"type":"t","key":"k"}"#,
                     #"{"v":1,"type":"t","key":"k","data":[]}"#, "not json"]
         {
-            #expect(throws: LumeCloudCryptoError.self) { try LumeCloudPayload.decode(Data(bad.utf8)) }
+            #expect(throws: StreamenCloudCryptoError.self) { try StreamenCloudPayload.decode(Data(bad.utf8)) }
         }
     }
 
     @Test func extraCannotShadowReservedKeys() throws {
-        let payload = LumeCloudPayload(type: "t", key: "k", data: [:], extra: ["v": 9, "key": "evil", "x": 1])
+        let payload = StreamenCloudPayload(type: "t", key: "k", data: [:], extra: ["v": 9, "key": "evil", "x": 1])
         #expect(payload.extra == ["x": 1])
-        #expect(try LumeCloudPayload.decode(payload.encoded()).key == "k")
+        #expect(try StreamenCloudPayload.decode(payload.encoded()).key == "k")
     }
 
     @Test func sealAndOpenPayload() throws {
-        let keys = LumeCloudKeys.generate()
-        let payload = LumeCloudPayload(type: "liveTVPrefs", key: "liveTVPrefs", data: ["showsFavorites": true, "updatedAt": 1])
+        let keys = StreamenCloudKeys.generate()
+        let payload = StreamenCloudPayload(type: "liveTVPrefs", key: "liveTVPrefs", data: ["showsFavorites": true, "updatedAt": 1])
         let (rid, ciphertext) = try keys.seal(payload)
         #expect(rid == keys.recordID(for: "liveTVPrefs"))
         #expect(try keys.openPayload(ciphertext, rid: rid) == payload)

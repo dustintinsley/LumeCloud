@@ -1,6 +1,6 @@
 import CryptoKit
 import Foundation
-@testable import LumeCloudKit
+@testable import StreamenCloudKit
 import Testing
 
 /// Known answers computed independently (Python `cryptography` + `hmac`), not
@@ -45,7 +45,7 @@ struct CryptoTests {
     // MARK: Derivation (§2.1–2.3)
 
     @Test func derivedKeysMatchKnownAnswers() throws {
-        let keys = try LumeCloudKeys(rootKey: Self.rootKey)
+        let keys = try StreamenCloudKeys(rootKey: Self.rootKey)
         #expect(Base64URL.encode(keys.encKey) == "f18CI76RBI0GwrkRzvUTAmFlxasz6lkd0HsHKk3ShOU")
         #expect(Base64URL.encode(keys.idKey) == "f11yudjFP1b3yoGlAEH0IEM6iFrBAWwYadfc6qdH-qU")
         #expect(Base64URL.encode(keys.authKey) == "Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY")
@@ -54,15 +54,15 @@ struct CryptoTests {
     }
 
     @Test func accountIDMatchesKnownAnswer() throws {
-        // HKDF-SHA256(rootKey, salt = empty, info = "lume-cloud/v1/account", L = 16), via Python hmac.
-        let keys = try LumeCloudKeys(rootKey: Self.rootKey)
+        // HKDF-SHA256(rootKey, salt = empty, info = "streamen-cloud/v1/account", L = 16), via Python hmac.
+        let keys = try StreamenCloudKeys(rootKey: Self.rootKey)
         #expect(keys.accountId == "cbm-snbxbUtTCAM8n_puuA")
         #expect(keys.accountId.count == 22)
-        #expect(try LumeCloudKeys(rootKey: Data(repeating: 0xFF, count: 32)).accountId != keys.accountId)
+        #expect(try StreamenCloudKeys(rootKey: Data(repeating: 0xFF, count: 32)).accountId != keys.accountId)
     }
 
     @Test func recordIDsMatchKnownAnswers() throws {
-        let keys = try LumeCloudKeys(rootKey: Self.rootKey)
+        let keys = try StreamenCloudKeys(rootKey: Self.rootKey)
         let rid = keys.recordID(for: Self.profileKey)
         #expect(rid == "PL16O2-5dNWbrjCBeq5bS6zLK5jgKjVNTfKR_6h2dNI")
         #expect(rid.count == 43)
@@ -71,24 +71,24 @@ struct CryptoTests {
     }
 
     @Test func rootKeyLengthIsChecked() {
-        #expect(throws: LumeCloudCryptoError.invalidKeyLength(expected: 32)) {
-            try LumeCloudKeys(rootKey: Data(count: 31))
+        #expect(throws: StreamenCloudCryptoError.invalidKeyLength(expected: 32)) {
+            try StreamenCloudKeys(rootKey: Data(count: 31))
         }
-        #expect(throws: LumeCloudCryptoError.invalidKeyLength(expected: 32)) {
-            try LumeCloudKeys(rootKey: Data(count: 33))
+        #expect(throws: StreamenCloudCryptoError.invalidKeyLength(expected: 32)) {
+            try StreamenCloudKeys(rootKey: Data(count: 33))
         }
     }
 
     @Test func generatedKeysAreFreshAndRoundTrip() throws {
-        let a = LumeCloudKeys.generate()
-        let b = LumeCloudKeys.generate()
+        let a = StreamenCloudKeys.generate()
+        let b = StreamenCloudKeys.generate()
         #expect(a.rootKey.count == 32)
         #expect(a.rootKey != b.rootKey)
-        #expect(try LumeCloudKeys(rootKey: a.rootKey) == a)
+        #expect(try StreamenCloudKeys(rootKey: a.rootKey) == a)
     }
 
     @Test func keysNeverPrintSecrets() throws {
-        let keys = try LumeCloudKeys(rootKey: Self.rootKey)
+        let keys = try StreamenCloudKeys(rootKey: Self.rootKey)
         var dumped = ""
         dump(keys, to: &dumped)
         for text in ["\(keys)", String(reflecting: keys), dumped] {
@@ -101,7 +101,7 @@ struct CryptoTests {
     // MARK: Envelope (§2.4)
 
     @Test func envelopeMatchesKnownAnswer() throws {
-        let keys = try LumeCloudKeys(rootKey: Self.rootKey)
+        let keys = try StreamenCloudKeys(rootKey: Self.rootKey)
         let rid = keys.recordID(for: Self.profileKey)
         let payload = #"{"data":{"colorRaw":"blue","createdAt":1760000000000,"id":"6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D","isChild":true,"name":"Zoë's \"Room\"","sortOrder":1,"symbolName":"star.fill","updatedAt":1760000123456},"key":"profile/6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D","type":"profile","v":1}"#
         let wire = try keys.seal(Data(payload.utf8), rid: rid, nonce: Data(0xA0 ..< 0xAC))
@@ -110,7 +110,7 @@ struct CryptoTests {
     }
 
     @Test func envelopeLayout() throws {
-        let keys = LumeCloudKeys.generate()
+        let keys = StreamenCloudKeys.generate()
         let wire = try keys.seal(Data("hello".utf8), rid: "r")
         let envelope = try #require(Base64URL.decode(wire))
         #expect(envelope.first == 0x01)
@@ -119,7 +119,7 @@ struct CryptoTests {
     }
 
     @Test func envelopeRoundTripUsesFreshNonces() throws {
-        let keys = LumeCloudKeys.generate()
+        let keys = StreamenCloudKeys.generate()
         let plaintext = Data("{\"v\":1}".utf8)
         let first = try keys.seal(plaintext, rid: "rid-a")
         let second = try keys.seal(plaintext, rid: "rid-a")
@@ -130,60 +130,60 @@ struct CryptoTests {
     }
 
     @Test func wrongRIDFailsToOpen() throws {
-        let keys = LumeCloudKeys.generate()
+        let keys = StreamenCloudKeys.generate()
         let wire = try keys.seal(Data("secret".utf8), rid: "rid-a")
-        #expect(throws: LumeCloudCryptoError.authenticationFailed) { try keys.open(wire, rid: "rid-b") }
+        #expect(throws: StreamenCloudCryptoError.authenticationFailed) { try keys.open(wire, rid: "rid-b") }
     }
 
     @Test func wrongKeyFailsToOpen() throws {
-        let wire = try LumeCloudKeys.generate().seal(Data("secret".utf8), rid: "rid-a")
-        #expect(throws: LumeCloudCryptoError.authenticationFailed) {
-            try LumeCloudKeys.generate().open(wire, rid: "rid-a")
+        let wire = try StreamenCloudKeys.generate().seal(Data("secret".utf8), rid: "rid-a")
+        #expect(throws: StreamenCloudCryptoError.authenticationFailed) {
+            try StreamenCloudKeys.generate().open(wire, rid: "rid-a")
         }
     }
 
     @Test func tamperedEnvelopeFailsToOpen() throws {
-        let keys = LumeCloudKeys.generate()
+        let keys = StreamenCloudKeys.generate()
         let envelope = try #require(Base64URL.decode(keys.seal(Data("secret payload".utf8), rid: "r")))
         // Flip one bit in the nonce, the ciphertext and the tag in turn.
         for index in [1, 14, envelope.count - 1] {
             var tampered = envelope
             tampered[index] ^= 0x01
-            #expect(throws: LumeCloudCryptoError.authenticationFailed) {
+            #expect(throws: StreamenCloudCryptoError.authenticationFailed) {
                 try keys.open(Base64URL.encode(tampered), rid: "r")
             }
         }
         // Truncated.
-        #expect(throws: LumeCloudCryptoError.authenticationFailed) {
+        #expect(throws: StreamenCloudCryptoError.authenticationFailed) {
             try keys.open(Base64URL.encode(envelope.dropLast()), rid: "r")
         }
     }
 
     @Test func unknownVersionIsTyped() throws {
-        let keys = LumeCloudKeys.generate()
+        let keys = StreamenCloudKeys.generate()
         var envelope = try #require(Base64URL.decode(keys.seal(Data("x".utf8), rid: "r")))
         envelope[0] = 0x02
-        #expect(throws: LumeCloudCryptoError.unsupportedEnvelopeVersion(2)) {
+        #expect(throws: StreamenCloudCryptoError.unsupportedEnvelopeVersion(2)) {
             try keys.open(Base64URL.encode(envelope), rid: "r")
         }
         // Checked before the length, so a future short format still reads as "unknown version".
-        #expect(throws: LumeCloudCryptoError.unsupportedEnvelopeVersion(0x7F)) {
+        #expect(throws: StreamenCloudCryptoError.unsupportedEnvelopeVersion(0x7F)) {
             try keys.open(Base64URL.encode(Data([0x7F])), rid: "r")
         }
     }
 
     @Test func garbageIsRejected() {
-        let keys = LumeCloudKeys.generate()
-        #expect(throws: LumeCloudCryptoError.invalidBase64) { try keys.open("not base64!", rid: "r") }
-        #expect(throws: LumeCloudCryptoError.malformedEnvelope) { try keys.open("", rid: "r") }
-        #expect(throws: LumeCloudCryptoError.malformedEnvelope) {
+        let keys = StreamenCloudKeys.generate()
+        #expect(throws: StreamenCloudCryptoError.invalidBase64) { try keys.open("not base64!", rid: "r") }
+        #expect(throws: StreamenCloudCryptoError.malformedEnvelope) { try keys.open("", rid: "r") }
+        #expect(throws: StreamenCloudCryptoError.malformedEnvelope) {
             try keys.open(Base64URL.encode(Data([0x01, 0, 0])), rid: "r")
         }
     }
 
     @Test func nonceLengthIsChecked() {
-        let keys = LumeCloudKeys.generate()
-        #expect(throws: LumeCloudCryptoError.invalidKeyLength(expected: 12)) {
+        let keys = StreamenCloudKeys.generate()
+        #expect(throws: StreamenCloudCryptoError.invalidKeyLength(expected: 12)) {
             try keys.seal(Data(), rid: "r", nonce: Data(count: 8))
         }
     }

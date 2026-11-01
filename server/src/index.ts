@@ -1,4 +1,4 @@
-// Lume Cloud — zero-knowledge sync server (Cloudflare Worker entry point).
+// Streamen Cloud — zero-knowledge sync server (Cloudflare Worker entry point).
 //
 // Logging policy: one structured line per request with the method, route
 // template, status and duration. Never request bodies, headers, keys, tokens,
