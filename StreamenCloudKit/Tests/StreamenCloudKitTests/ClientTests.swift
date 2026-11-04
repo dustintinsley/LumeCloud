@@ -149,7 +149,7 @@ struct ClientTests {
 
     @Test func createAccount() async throws {
         let keys = try StreamenCloudKeys(rootKey: Data(0 ..< 32))
-        let client = makeClient { _ in Self.ok(#"{"accountId":"cbm-snbxbUtTCAM8n_puuA","createdAt":1760000000000}"#, status: 201) }
+        let client = makeClient { _ in Self.ok(#"{"accountId":"3Z_WPSEMqpMTD12R-NZkYw","createdAt":1760000000000}"#, status: 201) }
         let created = try await client.createAccount(keys: keys, invite: "inv")
         #expect(created == AccountCreated(accountId: keys.accountId, createdAt: 1_760_000_000_000))
         let request = try lastRequest()
@@ -157,7 +157,7 @@ struct ClientTests {
         #expect(request.path == "/v1/accounts")
         #expect(request.headers["Content-Type"] == "application/json")
         #expect(request.json == [
-            "authVerifier": .string(keys.authVerifier), "accountId": "cbm-snbxbUtTCAM8n_puuA", "invite": "inv",
+            "authVerifier": .string(keys.authVerifier), "accountId": "3Z_WPSEMqpMTD12R-NZkYw", "invite": "inv",
         ])
         expectNoAuth(request)
     }
@@ -406,10 +406,10 @@ struct ClientTests {
     @Test func credentialsFromKeys() throws {
         let keys = try StreamenCloudKeys(rootKey: Data(0 ..< 32))
         let credentials = StreamenCloudClient.Credentials(accountId: "a", keys: keys, deviceID: Self.deviceID)
-        #expect(credentials.authorizationHeader == "Bearer a.Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY")
+        #expect(credentials.authorizationHeader == "Bearer a.sPYR8-X019Rn_JD_XQCJmO93EUtyPAwJSvDIZqefJbo")
         let derived = StreamenCloudClient.Credentials(keys: keys, deviceID: Self.deviceID)
-        #expect(derived.accountId == "cbm-snbxbUtTCAM8n_puuA")
-        #expect(derived.authorizationHeader == "Bearer cbm-snbxbUtTCAM8n_puuA.Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY")
+        #expect(derived.accountId == "3Z_WPSEMqpMTD12R-NZkYw")
+        #expect(derived.authorizationHeader == "Bearer 3Z_WPSEMqpMTD12R-NZkYw.sPYR8-X019Rn_JD_XQCJmO93EUtyPAwJSvDIZqefJbo")
         var dumped = ""
         dump(credentials, to: &dumped)
         for text in ["\(credentials)", String(reflecting: credentials), dumped] {

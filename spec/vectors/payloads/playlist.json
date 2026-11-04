@@ -30,7 +30,7 @@
         "type" : "playlist",
         "v" : 1
       },
-      "rid" : "1dWyHOeSOHf4gvduNMnQmUuBFnMW5zchSyfJhyyuPtE"
+      "rid" : "2zv_jA7ztD7fqJjv5onARo9Kd_EdScHyDWHCUiHPpKE"
     },
     {
       "canonicalPayload" : "{\"data\":{\"epgURL\":null,\"hiddenTabsRaw\":\"\",\"id\":\"0A1B2C3D-0000-4000-8000-00000000AB02\",\"macAddress\":\"00:1A:79:00:00:01\",\"name\":\"Zoë's \\\"Portal\\\"\",\"password\":\"\",\"serverURL\":\"http://portal.example/c/\",\"sourceTypeRaw\":\"stalker\",\"syncEnabled\":false,\"updatedAt\":1760000123456,\"username\":\"\"},\"key\":\"playlist/0A1B2C3D-0000-4000-8000-00000000AB02\",\"type\":\"playlist\",\"v\":1}",
@@ -54,7 +54,7 @@
         "type" : "playlist",
         "v" : 1
       },
-      "rid" : "yYFUkWeg3-N-HOk2dMd-sCXkrpEriTtqbQSQ5SrpLTI"
+      "rid" : "rkKzt7e1UPlbg3v7JcVgT-m0kxmLJah7PZv1P_wO-4o"
     },
     {
       "canonicalPayload" : "{\"data\":{\"epgURL\":\"http://provider.example:8080/xmltv.php\",\"futureField\":{\"nested\":[\"é\",\"a/b\",0.00001,1e+21]},\"hiddenTabsRaw\":\"series,liveTV\",\"id\":\"0A1B2C3D-0000-4000-8000-00000000AB01\",\"macAddress\":\"\",\"name\":\"Harbor Lights\",\"password\":\"secret\",\"serverURL\":\"http://provider.example:8080\",\"sourceTypeRaw\":\"xtream\",\"syncEnabled\":true,\"updatedAt\":1760000123456,\"username\":\"viewer\"},\"futureMeta\":\"kept\",\"key\":\"playlist/0A1B2C3D-0000-4000-8000-00000000AB01\",\"type\":\"playlist\",\"v\":1}",
@@ -88,7 +88,7 @@
         "v" : 1
       },
       "previousCanonicalPayload" : "{\"data\":{\"epgURL\":\"http://provider.example:8080/xmltv.php\",\"futureField\":{\"nested\":[\"é\",\"a/b\",0.00001,1e+21]},\"hiddenTabsRaw\":\"series,liveTV\",\"id\":\"0A1B2C3D-0000-4000-8000-00000000AB01\",\"macAddress\":\"\",\"name\":\"Harbor Lights\",\"password\":\"secret\",\"serverURL\":\"http://provider.example:8080\",\"sourceTypeRaw\":\"xtream\",\"syncEnabled\":true,\"updatedAt\":1759000000000,\"username\":\"viewer\"},\"futureMeta\":\"kept\",\"key\":\"playlist/0A1B2C3D-0000-4000-8000-00000000AB01\",\"type\":\"playlist\",\"v\":1}",
-      "rid" : "1dWyHOeSOHf4gvduNMnQmUuBFnMW5zchSyfJhyyuPtE"
+      "rid" : "2zv_jA7ztD7fqJjv5onARo9Kd_EdScHyDWHCUiHPpKE"
     }
   ],
   "rootKey" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",

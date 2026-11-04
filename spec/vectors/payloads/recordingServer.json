@@ -28,7 +28,7 @@
         "type" : "recordingServer",
         "v" : 1
       },
-      "rid" : "j68miKgGcXyT5Uf7nQGQFbdEOrWr69pSXvgwQXshm8Q"
+      "rid" : "rvoJX1V4KOxooFBREpCoAI6rIUwb2BVRYOvneO7U2rM"
     },
     {
       "canonicalPayload" : "{\"data\":{\"baseURL\":\"http://attic.example\",\"deviceID\":null,\"id\":\"0A1B2C3D-0000-4000-8000-00000000DD09\",\"isEnabled\":false,\"kindRaw\":\"streamenRecorder\",\"name\":\"Attic\",\"serverID\":null,\"token\":\"\",\"updatedAt\":1760000123456},\"key\":\"recordingServer/0A1B2C3D-0000-4000-8000-00000000DD09\",\"type\":\"recordingServer\",\"v\":1}",
@@ -50,7 +50,7 @@
         "type" : "recordingServer",
         "v" : 1
       },
-      "rid" : "B7wx6HvUEng041DrUjp5vOLj62OIL6vIydL41x_a7D4"
+      "rid" : "NRH2gHcrWYsxbGArSXzpJBYtyBbYnmnIJgFbDa4no9E"
     },
     {
       "canonicalPayload" : "{\"data\":{\"baseURL\":\"http://recorder.example:8089\",\"deviceID\":\"0A1B2C3D-0000-4000-8000-00000000DD03\",\"futureField\":{\"nested\":[\"é\",\"a/b\",0.00001,1e+21]},\"id\":\"0A1B2C3D-0000-4000-8000-00000000DD01\",\"isEnabled\":true,\"kindRaw\":\"streamenRecorder\",\"name\":\"Basement Recorder\",\"serverID\":\"0A1B2C3D-0000-4000-8000-00000000DD02\",\"token\":\"fictional-pairing-token\",\"updatedAt\":1760000123456},\"futureMeta\":\"kept\",\"key\":\"recordingServer/0A1B2C3D-0000-4000-8000-00000000DD01\",\"type\":\"recordingServer\",\"v\":1}",
@@ -82,7 +82,7 @@
         "v" : 1
       },
       "previousCanonicalPayload" : "{\"data\":{\"baseURL\":\"http://recorder.example:8089\",\"deviceID\":\"0A1B2C3D-0000-4000-8000-00000000DD03\",\"futureField\":{\"nested\":[\"é\",\"a/b\",0.00001,1e+21]},\"id\":\"0A1B2C3D-0000-4000-8000-00000000DD01\",\"isEnabled\":true,\"kindRaw\":\"streamenRecorder\",\"name\":\"Basement Recorder\",\"serverID\":\"0A1B2C3D-0000-4000-8000-00000000DD02\",\"token\":\"fictional-pairing-token\",\"updatedAt\":1759000000000},\"futureMeta\":\"kept\",\"key\":\"recordingServer/0A1B2C3D-0000-4000-8000-00000000DD01\",\"type\":\"recordingServer\",\"v\":1}",
-      "rid" : "j68miKgGcXyT5Uf7nQGQFbdEOrWr69pSXvgwQXshm8Q"
+      "rid" : "rvoJX1V4KOxooFBREpCoAI6rIUwb2BVRYOvneO7U2rM"
     }
   ],
   "rootKey" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",

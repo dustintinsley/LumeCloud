@@ -22,7 +22,7 @@
         "type" : "categoryRestriction",
         "v" : 1
       },
-      "rid" : "UWy4OP2bGvzZyAgvzyfrWJho9xE-KEcrncLxMgRzAdA"
+      "rid" : "CbJG_pShDaR8MR3ch4txJtIZd2APtwKwuojlaHcuPOg"
     },
     {
       "canonicalPayload" : "{\"data\":{\"categoryID\":\"0A1B2C3D-0000-4000-8000-00000000AB01-vod-12\",\"futureField\":{\"nested\":[\"é\",\"a/b\",0.00001,1e+21]},\"isRestricted\":true,\"updatedAt\":1760000123456},\"futureMeta\":\"kept\",\"key\":\"categoryRestriction/0A1B2C3D-0000-4000-8000-00000000AB01-vod-12\",\"type\":\"categoryRestriction\",\"v\":1}",
@@ -48,7 +48,7 @@
         "v" : 1
       },
       "previousCanonicalPayload" : "{\"data\":{\"categoryID\":\"0A1B2C3D-0000-4000-8000-00000000AB01-vod-12\",\"futureField\":{\"nested\":[\"é\",\"a/b\",0.00001,1e+21]},\"isRestricted\":true,\"updatedAt\":1759000000000},\"futureMeta\":\"kept\",\"key\":\"categoryRestriction/0A1B2C3D-0000-4000-8000-00000000AB01-vod-12\",\"type\":\"categoryRestriction\",\"v\":1}",
-      "rid" : "UWy4OP2bGvzZyAgvzyfrWJho9xE-KEcrncLxMgRzAdA"
+      "rid" : "CbJG_pShDaR8MR3ch4txJtIZd2APtwKwuojlaHcuPOg"
     }
   ],
   "rootKey" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",

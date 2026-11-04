@@ -1,23 +1,23 @@
 {
   "format" : "streamen-cloud-crypto-vectors",
   "keys" : {
-    "accountId" : "cbm-snbxbUtTCAM8n_puuA",
+    "accountId" : "3Z_WPSEMqpMTD12R-NZkYw",
     "accountIdInfo" : "streamen-cloud/v1/account",
     "authKey" : {
       "info" : "streamen-cloud/v1/auth",
-      "value" : "Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY"
+      "value" : "sPYR8-X019Rn_JD_XQCJmO93EUtyPAwJSvDIZqefJbo"
     },
-    "authToken" : "Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY",
-    "authVerifier" : "Xa2C5IEgh90MuDpcLkDA-i46mFdi_kaokB13ETS505I",
-    "authorizationHeader" : "Bearer cbm-snbxbUtTCAM8n_puuA.Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY",
+    "authToken" : "sPYR8-X019Rn_JD_XQCJmO93EUtyPAwJSvDIZqefJbo",
+    "authVerifier" : "9epJHjdeu5JKPc154YcAM_AusFank91SmEGm5ektmtE",
+    "authorizationHeader" : "Bearer 3Z_WPSEMqpMTD12R-NZkYw.sPYR8-X019Rn_JD_XQCJmO93EUtyPAwJSvDIZqefJbo",
     "encKey" : {
       "info" : "streamen-cloud/v1/enc",
-      "value" : "f18CI76RBI0GwrkRzvUTAmFlxasz6lkd0HsHKk3ShOU"
+      "value" : "LhmApjcFPwtajnNBmJHXCsqPXAY2F8F6uPhsuuhcPbE"
     },
     "hkdf" : "HKDF-SHA256, salt = empty, L = 32",
     "idKey" : {
       "info" : "streamen-cloud/v1/id",
-      "value" : "f11yudjFP1b3yoGlAEH0IEM6iFrBAWwYadfc6qdH-qU"
+      "value" : "o1HfnMeZVKFXqkwYO2npG23sCLLOdkmTiYjXx7zRXRg"
     },
     "rootKey" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
     "rootKeyHex" : "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
@@ -34,12 +34,12 @@
     "Recovery key: Crockford base32 of the 256 key bits (big-endian, 4 zero pad bits), plus the Crockford mod-37 check symbol, grouped by 4."
   ],
   "pairing" : {
-    "canonicalGrant" : "{\"accountId\":\"cbm-snbxbUtTCAM8n_puuA\",\"rootKey\":\"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8\",\"serverURL\":\"https://cloud-staging.getlume.org\"}",
-    "ciphertext" : "G5RW-qACeyhuubD54D5tWj3FYcKCYg6-s6haLGVwJNdGJiun7t-YXQm9dbVcdmUy0XqFOMP_Zl5vDwGshJx9hKEF6kpLslPw6N5ENLfXOlLVrUbQyvm-aHQV4jkotzasJcgIhCftGfYvzoYP31OFdD_HoKId9vKOXFw_PFQjL85yvWzdQOmrLo_KemeSCU8W2XisMFjOoHgxOORx51c",
+    "canonicalGrant" : "{\"accountId\":\"3Z_WPSEMqpMTD12R-NZkYw\",\"rootKey\":\"AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8\",\"serverURL\":\"https://cloud-staging.getlume.org\"}",
+    "ciphertext" : "bItlYCpS6a83SYCqz2tzOvefLDUbYRcBxMFRTDIuFSqkkAopUdoP26kC_M7-5JGG3DHG0-HVWLiuSxT7er0C3LNpeH0S7_fwV5NJCykamIGYtNzmUufXoa_Ft80PNIHNtXQDESx9SvqzDYaCcYB9tJx9FfsiUd3oJm9g4qcEofdJCdpHwN1qmJznsIuOqXaodb7qW-N088ZJbhhz5i4",
     "code" : "483920",
-    "enc" : "TaB1fap2P6SgHXakTfSy1iroQugKAEhw5rD4dLS_kFY",
+    "enc" : "RKOELUVamFgXYlo58goWh8i-WpEQU570FQoSEz4-924",
     "grant" : {
-      "accountId" : "cbm-snbxbUtTCAM8n_puuA",
+      "accountId" : "3Z_WPSEMqpMTD12R-NZkYw",
       "rootKey" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
       "serverURL" : "https://cloud-staging.getlume.org"
     },
@@ -51,7 +51,7 @@
   "records" : [
     {
       "canonicalPayload" : "{\"data\":{\"colorRaw\":\"blue\",\"createdAt\":1760000000000,\"id\":\"6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D\",\"isChild\":true,\"name\":\"Zoë's \\\"Room\\\"\",\"sortOrder\":1,\"symbolName\":\"star.fill\",\"updatedAt\":1760000123456},\"key\":\"profile/6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D\",\"type\":\"profile\",\"v\":1}",
-      "envelope" : "AaChoqOkpaanqKmqqx6LLxIUbE5abNmi4jGXsh4pbw4y-m7QxKIzh8VSQMJibg30F0s-CD-4mfXK5sEnMOw9X1nEtx8v_EH6XpBCi5uA9zMH0k0nfqfEhsdZRpX3IkhaIjiX9u6FiuB19Vu-tOa9Wl7VSOJHfXw8X5VOj2MyhQOyEeJGG5GaLKu2ZkIgA0zaRpAb4JhaTmryU-tobl7IDC3RcI53e3HtXIiMt3GLudbKLRM33ywAZrLla3SI9n-NtrwdP7mOyO0TWGOcIaEz2WbF6cvn4RGjlz-X7oGnTU0EqaP48x2jPUvIOePoz4dkpaPKW5shRN6UF0Fu0V2YXpCnt6orfVgUvS0H4nweWf35zBQ_TRB1cc-On6_su1LryFk8qwFIfPtWiZ1yP4Z5z1ZUw1g",
+      "envelope" : "AaChoqOkpaanqKmqq_AviP0fAgXnBo1vrKDPwbHPv0VphapxV80ITd8wLtBhOYvtAGYCYkRgWf5yYY7zQkGUJ3TSQM-V1coXgIFlFa4gN2hPO2vDC9Me3UzME8R_MkOnBJ79fKfEOn0yCLkDy8SFLS2K4GcZP_tQSvLuvqgg7s9GsLlVqWkXRnVmgrwTxlz5xoBtPFvjyjM8IZQ4xnuWVG3kSYFFIJMyWBZYM-CQC8zs03pxZgVHuMa_Et1P6UEUigmGv0Q44fw2Jd2hXeSZYMbq-mciH8jhp02eFm563LehBUSzwWNkYLvtg2bAwx3vanqsKPx8soLhtgeWlfXxGcJc_IHMkK4gN0wPtlNTixgbLOdYr6JTRX2FkW8FIx_lsNdm0GUe_UpcBIPl2NKsMuZj2nU",
       "logicalKey" : "profile/6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D",
       "nonceHex" : "a0a1a2a3a4a5a6a7a8a9aaab",
       "payload" : {
@@ -69,11 +69,11 @@
         "type" : "profile",
         "v" : 1
       },
-      "rid" : "PL16O2-5dNWbrjCBeq5bS6zLK5jgKjVNTfKR_6h2dNI"
+      "rid" : "FgIGlleBtESMoREoxhCVanXgz55Xd_oyjEEK38mWchY"
     },
     {
       "canonicalPayload" : "{\"data\":{\"addedToWatchlistDate\":null,\"contentId\":\"movie-1001\",\"customOrder\":null,\"favoriteOrder\":3,\"futureField\":{\"nested\":[\"é\",\"a/b\",\"line\\nbreak\\u0001\",0.00001,1e-7,1e+21]},\"isFavorite\":true,\"isHidden\":false,\"isWatched\":false,\"kindRaw\":\"movie\",\"lastWatchedDate\":1760000200000,\"profileID\":\"6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D\",\"recommendationVoteRaw\":-1,\"updatedAt\":1760000200000,\"watchProgress\":1234.5},\"key\":\"content/6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D/movie-1001\",\"type\":\"content\",\"v\":1}",
-      "envelope" : "AbCxsrO0tba3uLm6uw2Zk45jxxJhFR7oX1quwTPqIhze7_zur9C5db6snPEtRPF94e-AJ0Ou731Uv7i7E-g2qVikHdcm1Pnk41uxPiSqBCja8W49Lw262iVDVTGUqiMaEq78CAioRPc0shHYoj8HMIFFyL9byTatr27g1BBR2U4hTqvhLMbciic_lMxa6l90oS2HxsxnZBzEZxqJGwe7OABoXwx-li2L6OKW5bi5cj-L4r4K1Y3JfPhcrlxTrp5-srYFMBqQQ4JA4KEZSTQ_zY6HgXZR0NgaVwutsAHT8zZm3r_vdRhKdEINAxMrpE4xF3gfv6ZWcNFXW6JhC8EN0UngLMbG5UxaMPpBrghIwwKTcSslsEbanqFOhw_eyT-OUzxLfOfH4OLK64U4GFWHSRzqfLhrmioVMbXCpmdj9EG2s_vxzWhGvwYrvPQfhfIoXjEAJdD3OnE2dxZQL9v8JWC2P0YVuZAvWxtJDgxw4ae3CMzOKEIqgCR0btWWyeb7IzMxwQ00tgveestUbaymc0KUnPschOmyAOZxdN52ZiEqOtiWzkFAy6U2EVZmFb0cVqgRsJ34RadgtQ6fFg0oxpGGPOS7n9p_jooGVNLHp4MApQ4mgoVmq6EZxniy5-vxGvUDsZpQd8im6yhj9nrhu_DG8s9qpx5TdvkluPWCJL9KA-LCc4Rb7ZJ_Iw",
+      "envelope" : "AbCxsrO0tba3uLm6ux2CLUhrKxTU0OSzi-SmPvBG5lR0TD-GEBhOQU7IrFbWZKA97O4l5PsmKNOZD_JU_qZMTnxjNrCwWqUrb-LZSCfyFD3VpcOERSF2s2_Xr6Jx2o6diND2KhCLJYjIxIVjZ5E6IvhkNqtiv2fyW5DwZx65xLhKzRX94A8A_6wjlYbOsLKO4WMTtvptp5W0lxREbCJH4xtzxJJ-qz71pbOCWhZ2dfIk8qeACHsyyDPlBqRzaD7TmwSmCG2-EAGdvNybWs1Y8vbiTVhD8ldFL0n3cYzrUw5KvAJ2N5_K-rXplZenxI6A3cvS9rEBPQbo803wSpaTIqCf_f7yexGWYNlSpQ8WsCoTHUpUBAEofRN1SYxH7aui5OlAwu0icz6kmiXl377VSk7ObV8nj83lGBDC37yg7WoAMFUcQFDqts-i5pmChsS1s9XvYlBIVT9iAjvko2EcQc7aIvK2wXYVUGSvntIiUgxJINMhjtcusizF3mcFmMFjzgMlqe6opkZXOqmcbgSHGPToDA67JfSNkeUhRIFWkGkLNT39331kV6TwwUm_w44k4k6xxzUe7IubhModMzLc4uTJNg5a_qGXB2VXfOr82FgwPz8ENH26a_uPl3p-rwCiA7RlumOFTQXfi5vr3BDXdWlBEWLxZ1YM1tR--c2kdS3g-7uhY8tQw-KYSg",
       "logicalKey" : "content/6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D/movie-1001",
       "nonceHex" : "b0b1b2b3b4b5b6b7b8b9babb",
       "payload" : {
@@ -106,7 +106,7 @@
         "type" : "content",
         "v" : 1
       },
-      "rid" : "9YJbgtJ3uJSRkKGuR5mt-G4F2HAwwufStcEpn8qwJCw"
+      "rid" : "V9Zweas_CUerA0Ftbo31DDk1xzwCcsSUoAqOqBpnotw"
     }
   ],
   "recoveryKey" : {
@@ -122,8 +122,8 @@
     "rendering" : "000G-40R4-0M30-E209-185G-R38E-1W81-24GK-2GAH-C5RR-34D1-P70X-3RFG-*"
   },
   "unsupportedEnvelope" : {
-    "envelope" : "AqChoqOkpaanqKmqqx6LLxIUbE5abNmi4jGXsh4pbw4y-m7QxKIzh8VSQMJibg30F0s-CD-4mfXK5sEnMOw9X1nEtx8v_EH6XpBCi5uA9zMH0k0nfqfEhsdZRpX3IkhaIjiX9u6FiuB19Vu-tOa9Wl7VSOJHfXw8X5VOj2MyhQOyEeJGG5GaLKu2ZkIgA0zaRpAb4JhaTmryU-tobl7IDC3RcI53e3HtXIiMt3GLudbKLRM33ywAZrLla3SI9n-NtrwdP7mOyO0TWGOcIaEz2WbF6cvn4RGjlz-X7oGnTU0EqaP48x2jPUvIOePoz4dkpaPKW5shRN6UF0Fu0V2YXpCnt6orfVgUvS0H4nweWf35zBQ_TRB1cc-On6_su1LryFk8qwFIfPtWiZ1yP4Z5z1ZUw1g",
-    "rid" : "PL16O2-5dNWbrjCBeq5bS6zLK5jgKjVNTfKR_6h2dNI",
+    "envelope" : "AqChoqOkpaanqKmqq_AviP0fAgXnBo1vrKDPwbHPv0VphapxV80ITd8wLtBhOYvtAGYCYkRgWf5yYY7zQkGUJ3TSQM-V1coXgIFlFa4gN2hPO2vDC9Me3UzME8R_MkOnBJ79fKfEOn0yCLkDy8SFLS2K4GcZP_tQSvLuvqgg7s9GsLlVqWkXRnVmgrwTxlz5xoBtPFvjyjM8IZQ4xnuWVG3kSYFFIJMyWBZYM-CQC8zs03pxZgVHuMa_Et1P6UEUigmGv0Q44fw2Jd2hXeSZYMbq-mciH8jhp02eFm563LehBUSzwWNkYLvtg2bAwx3vanqsKPx8soLhtgeWlfXxGcJc_IHMkK4gN0wPtlNTixgbLOdYr6JTRX2FkW8FIx_lsNdm0GUe_UpcBIPl2NKsMuZj2nU",
+    "rid" : "FgIGlleBtESMoREoxhCVanXgz55Xd_oyjEEK38mWchY",
     "versionByte" : 2
   },
   "version" : 1

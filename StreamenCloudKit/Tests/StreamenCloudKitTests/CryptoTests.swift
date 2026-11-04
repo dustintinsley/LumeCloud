@@ -46,17 +46,17 @@ struct CryptoTests {
 
     @Test func derivedKeysMatchKnownAnswers() throws {
         let keys = try StreamenCloudKeys(rootKey: Self.rootKey)
-        #expect(Base64URL.encode(keys.encKey) == "f18CI76RBI0GwrkRzvUTAmFlxasz6lkd0HsHKk3ShOU")
-        #expect(Base64URL.encode(keys.idKey) == "f11yudjFP1b3yoGlAEH0IEM6iFrBAWwYadfc6qdH-qU")
-        #expect(Base64URL.encode(keys.authKey) == "Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY")
-        #expect(keys.authToken == "Wvn4bW0A86n6O6NDhVbKaher7xdHMctYYtNfr-KGkTY")
-        #expect(keys.authVerifier == "Xa2C5IEgh90MuDpcLkDA-i46mFdi_kaokB13ETS505I")
+        #expect(Base64URL.encode(keys.encKey) == "LhmApjcFPwtajnNBmJHXCsqPXAY2F8F6uPhsuuhcPbE")
+        #expect(Base64URL.encode(keys.idKey) == "o1HfnMeZVKFXqkwYO2npG23sCLLOdkmTiYjXx7zRXRg")
+        #expect(Base64URL.encode(keys.authKey) == "sPYR8-X019Rn_JD_XQCJmO93EUtyPAwJSvDIZqefJbo")
+        #expect(keys.authToken == "sPYR8-X019Rn_JD_XQCJmO93EUtyPAwJSvDIZqefJbo")
+        #expect(keys.authVerifier == "9epJHjdeu5JKPc154YcAM_AusFank91SmEGm5ektmtE")
     }
 
     @Test func accountIDMatchesKnownAnswer() throws {
         // HKDF-SHA256(rootKey, salt = empty, info = "streamen-cloud/v1/account", L = 16), via Python hmac.
         let keys = try StreamenCloudKeys(rootKey: Self.rootKey)
-        #expect(keys.accountId == "cbm-snbxbUtTCAM8n_puuA")
+        #expect(keys.accountId == "3Z_WPSEMqpMTD12R-NZkYw")
         #expect(keys.accountId.count == 22)
         #expect(try StreamenCloudKeys(rootKey: Data(repeating: 0xFF, count: 32)).accountId != keys.accountId)
     }
@@ -64,10 +64,10 @@ struct CryptoTests {
     @Test func recordIDsMatchKnownAnswers() throws {
         let keys = try StreamenCloudKeys(rootKey: Self.rootKey)
         let rid = keys.recordID(for: Self.profileKey)
-        #expect(rid == "PL16O2-5dNWbrjCBeq5bS6zLK5jgKjVNTfKR_6h2dNI")
+        #expect(rid == "FgIGlleBtESMoREoxhCVanXgz55Xd_oyjEEK38mWchY")
         #expect(rid.count == 43)
         #expect(keys.recordID(for: "content/6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D/movie-1001")
-            == "9YJbgtJ3uJSRkKGuR5mt-G4F2HAwwufStcEpn8qwJCw")
+            == "V9Zweas_CUerA0Ftbo31DDk1xzwCcsSUoAqOqBpnotw")
     }
 
     @Test func rootKeyLengthIsChecked() {
@@ -105,7 +105,7 @@ struct CryptoTests {
         let rid = keys.recordID(for: Self.profileKey)
         let payload = #"{"data":{"colorRaw":"blue","createdAt":1760000000000,"id":"6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D","isChild":true,"name":"Zoë's \"Room\"","sortOrder":1,"symbolName":"star.fill","updatedAt":1760000123456},"key":"profile/6F1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D","type":"profile","v":1}"#
         let wire = try keys.seal(Data(payload.utf8), rid: rid, nonce: Data(0xA0 ..< 0xAC))
-        #expect(wire == "AaChoqOkpaanqKmqqx6LLxIUbE5abNmi4jGXsh4pbw4y-m7QxKIzh8VSQMJibg30F0s-CD-4mfXK5sEnMOw9X1nEtx8v_EH6XpBCi5uA9zMH0k0nfqfEhsdZRpX3IkhaIjiX9u6FiuB19Vu-tOa9Wl7VSOJHfXw8X5VOj2MyhQOyEeJGG5GaLKu2ZkIgA0zaRpAb4JhaTmryU-tobl7IDC3RcI53e3HtXIiMt3GLudbKLRM33ywAZrLla3SI9n-NtrwdP7mOyO0TWGOcIaEz2WbF6cvn4RGjlz-X7oGnTU0EqaP48x2jPUvIOePoz4dkpaPKW5shRN6UF0Fu0V2YXpCnt6orfVgUvS0H4nweWf35zBQ_TRB1cc-On6_su1LryFk8qwFIfPtWiZ1yP4Z5z1ZUw1g")
+        #expect(wire == "AaChoqOkpaanqKmqq_AviP0fAgXnBo1vrKDPwbHPv0VphapxV80ITd8wLtBhOYvtAGYCYkRgWf5yYY7zQkGUJ3TSQM-V1coXgIFlFa4gN2hPO2vDC9Me3UzME8R_MkOnBJ79fKfEOn0yCLkDy8SFLS2K4GcZP_tQSvLuvqgg7s9GsLlVqWkXRnVmgrwTxlz5xoBtPFvjyjM8IZQ4xnuWVG3kSYFFIJMyWBZYM-CQC8zs03pxZgVHuMa_Et1P6UEUigmGv0Q44fw2Jd2hXeSZYMbq-mciH8jhp02eFm563LehBUSzwWNkYLvtg2bAwx3vanqsKPx8soLhtgeWlfXxGcJc_IHMkK4gN0wPtlNTixgbLOdYr6JTRX2FkW8FIx_lsNdm0GUe_UpcBIPl2NKsMuZj2nU")
         #expect(try keys.open(wire, rid: rid) == Data(payload.utf8))
     }
 

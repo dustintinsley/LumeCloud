@@ -24,7 +24,7 @@
         "type" : "epgSource",
         "v" : 1
       },
-      "rid" : "fVdz_Hi6dsYjmWYRDNWhQ3bJH3PwyQGw90_lwZb0bGs"
+      "rid" : "M3b1xQVhD53r5FKkO3V2IyqlxqVZmZg51chzxf8SH_c"
     },
     {
       "canonicalPayload" : "{\"data\":{\"futureField\":{\"nested\":[\"é\",\"a/b\",0.00001,1e+21]},\"id\":\"0A1B2C3D-0000-4000-8000-00000000EE01\",\"isEnabled\":false,\"name\":\"Meadow Guide\",\"updatedAt\":1760000123456,\"url\":\"https://guide.example/xmltv.xml.gz\"},\"futureMeta\":\"kept\",\"key\":\"epgSource/0A1B2C3D-0000-4000-8000-00000000EE01\",\"type\":\"epgSource\",\"v\":1}",
@@ -52,7 +52,7 @@
         "v" : 1
       },
       "previousCanonicalPayload" : "{\"data\":{\"futureField\":{\"nested\":[\"é\",\"a/b\",0.00001,1e+21]},\"id\":\"0A1B2C3D-0000-4000-8000-00000000EE01\",\"isEnabled\":false,\"name\":\"Meadow Guide\",\"updatedAt\":1759000000000,\"url\":\"https://guide.example/xmltv.xml.gz\"},\"futureMeta\":\"kept\",\"key\":\"epgSource/0A1B2C3D-0000-4000-8000-00000000EE01\",\"type\":\"epgSource\",\"v\":1}",
-      "rid" : "fVdz_Hi6dsYjmWYRDNWhQ3bJH3PwyQGw90_lwZb0bGs"
+      "rid" : "M3b1xQVhD53r5FKkO3V2IyqlxqVZmZg51chzxf8SH_c"
     }
   ],
   "rootKey" : "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8",
